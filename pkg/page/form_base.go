@@ -105,8 +105,8 @@ func (f *FormBase) AddJQuery() {
 	if !config.Release {
 		f.AddJavaScriptFile(filepath.Join(config.GoraddAssets(), "js", "jquery3.js"), false, nil)
 	} else {
-		f.AddJavaScriptFile("https://code.jquery.com/jquery-3.4.1.min.js", false,
-			html.NewAttributes().Set("integrity", "sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=").
+		f.AddJavaScriptFile("https://code.jquery.com/jquery-3.5.1.slim.min.js", false,
+			html.NewAttributes().Set("integrity", "sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj").
 				Set("crossorigin", "anonymous"))
 	}
 }

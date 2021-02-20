@@ -17,6 +17,7 @@ import (
 	reflect2 "github.com/goradd/goradd/pkg/reflect"
 	"github.com/goradd/goradd/pkg/session"
 	strings2 "github.com/goradd/goradd/pkg/strings"
+	"net/http"
 	"reflect"
 	"strconv"
 	"strings"
@@ -79,7 +80,8 @@ type Page struct {
 	idCounter       int
 	title           string // page title to draw in head tag
 	htmlHeaderTags  []html.VoidTag
-	responseHeader  map[string]string // queues up anything to be sent in the response header
+	responseHeader  map[string]interface{} // queues up anything to be sent in the response header
+	responseCookies map[string]*http.Cookie // cookies to send
 	responseError   int
 
 	language int // Don't serialize this. This is a cached version of what the session holds.
@@ -573,19 +575,64 @@ func (p *Page) HasMetaTag(name string) bool {
 	return false
 }
 
-// SetResponseHeader sets a value in the html response header. You generally would only need to do this if your are outputting
-// custom content, like a pdf file.
+// SetResponseHeader sets a value in the html response header.
+//
+// You generally would only need to do this if your are outputting custom content, like a pdf file.
+// If you need to set a multi-value header, one way is to separate the values with commas. Another is
+// to use AddResponseHeader
 func (p *Page) SetResponseHeader(key, value string) {
 	if p.responseHeader == nil {
-		p.responseHeader = map[string]string{}
+		p.responseHeader = make(map[string]interface{})
 	}
 	p.responseHeader[key] = value
+}
+
+// AddResponseHeader adds a value to a multi-value header key
+func (p *Page) AddResponseHeader(key, value string) {
+	if p.responseHeader == nil {
+		p.responseHeader = make(map[string]interface{})
+	}
+	var values []string
+	if p.responseHeader[key] != nil {
+		values = p.responseHeader[key].([]string)
+	}
+	values = append(values, value)
+	p.responseHeader[key] = values
+}
+
+// SetResponseCookie will send the cookie back as a response.
+// If the cookie has already been set, this will over-write the previous cookie.
+func (p *Page) SetResponseCookie(c *http.Cookie) {
+	if p.responseCookies == nil {
+		p.responseCookies = make(map[string]*http.Cookie)
+	}
+	p.responseCookies[c.Name] = c
 }
 
 // ClearResponseHeaders removes all the current response headers.
 func (p *Page) ClearResponseHeaders() {
 	p.responseHeader = nil
 }
+
+func (p *Page) gatherResponsHeaders() map[string]string {
+	r := make(map[string]string)
+	for _,c := range p.responseCookies {
+		p.AddResponseHeader("Set-Cookie", c.String())
+	}
+	for k,v := range p.responseHeader {
+		switch h := v.(type) {
+		case string:
+			r[k] = h
+		case []string:
+			r[k] = strings.Join(h, ", ")
+		}
+	}
+	if len(r) == 0 {
+		return nil
+	}
+	return r
+}
+
 
 // PushRedraw will cause the form to refresh in between events. This will cause the client to pull
 // the ajax response. Its possible that this will happen while drawing. We avoid the race condition

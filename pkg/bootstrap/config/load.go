@@ -32,12 +32,12 @@ func LoadBootstrap(form page.FormI) {
 			})
 		form.AddJQuery()
 		if config.Release {
-			form.AddJavaScriptFile("https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js", false,
-				html.NewAttributes().Set("integrity", "sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1").Set("crossorigin", "anonymous"))
-			form.AddJavaScriptFile("https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js", false,
-				html.NewAttributes().Set("integrity", "sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM").Set("crossorigin", "anonymous"))
-			form.AddStyleSheetFile("https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css",
-				html.NewAttributes().Set("integrity", "sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T").Set("crossorigin", "anonymous"))
+			form.AddJavaScriptFile("https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js", false,
+				html.NewAttributes().Set("integrity", "sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN").Set("crossorigin", "anonymous"))
+			form.AddJavaScriptFile("https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js", false,
+				html.NewAttributes().Set("integrity", "sha384-+YQ4JLhjyBLPDQt//I+STsc9iw4uQqACwlvpslubQzn4u2UU2UFM80nGisd026JF").Set("crossorigin", "anonymous"))
+			form.AddStyleSheetFile("https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css",
+				html.NewAttributes().Set("integrity", "sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l").Set("crossorigin", "anonymous"))
 			form.AddJavaScriptFile(filepath.Join(BootstrapAssets(), "js", "gr.bs.shim.js"), false, nil)
 		} else {
 			form.AddJavaScriptFile(filepath.Join(BootstrapAssets(), "js", "bootstrap.bundle.js"), false, nil)

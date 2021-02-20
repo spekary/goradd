@@ -1,6 +1,10 @@
 package strings
 
-import "math/rand"
+import (
+	cryptrand "crypto/rand"
+	"encoding/base64"
+	"math/rand"
+)
 
 // RandomString generates a pseudo random string of the given length using the given characters.
 // The distribution is not perfect, but works for general purposes
@@ -27,7 +31,7 @@ const passwordBytes = passwordLower + passwordUpper + passwordNum + passwordSym
 // n must be at least 4
 func PasswordString(n int) string {
 	if n < 4 {
-		panic ("n must be at least 4")
+		panic("n must be at least 4")
 	}
 	b := make([]byte, n)
 	b[0] = passwordLower[rand.Int()%len(passwordLower)]
@@ -37,11 +41,20 @@ func PasswordString(n int) string {
 	for i := 4; i < len(b); i++ {
 		b[i] = passwordBytes[rand.Int()%len(passwordBytes)]
 	}
-	rand.Shuffle(n, func(i,j int) {
+	rand.Shuffle(n, func(i, j int) {
 		temp := b[i]
 		b[i] = b[j]
 		b[j] = temp
 	})
 
 	return string(b)
+}
+
+// Token creates a cryptographically secure login token for use in a cookie.
+// The token will be base64 encoded.
+func Token(len int) string {
+	b := make([]byte, len)
+	_, _ = cryptrand.Read(b)
+	s := base64.RawStdEncoding.EncodeToString(b)
+	return s
 }

@@ -627,9 +627,9 @@ func (m *Mysql5) getTableDescription(t mysqlTable) TableDescription {
 	for _, col := range t.columns {
 		cd := m.getColumnDescription(t, col)
 
+		// private keys go first
+		// the following code does an insert after whatever previous pks have been found. Its important to do these in order.
 		if cd.IsPk {
-			// private keys go first
-			// the following code does an insert after whatever previous pks have been found. Its important to do these in order.
 			columnDescriptions = append(columnDescriptions, ColumnDescription{})
 			copy(columnDescriptions[pkCount+1:], columnDescriptions[pkCount:])
 			columnDescriptions[pkCount] = cd
@@ -637,6 +637,10 @@ func (m *Mysql5) getTableDescription(t mysqlTable) TableDescription {
 		} else {
 			columnDescriptions = append(columnDescriptions, cd)
 		}
+	}
+
+	if pkCount == 0 {
+		log.Print("Error in table " + t.name + ": the table does not have a primary key.")
 	}
 
 	td := TableDescription{

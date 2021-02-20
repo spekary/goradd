@@ -133,7 +133,10 @@ func (m *PageManager) RunPage(ctx context.Context, buf *bytes.Buffer) (headers m
 			case string:
 				err := newRunError(ctx, v)
 				m.makeErrorResponse(ctx, err, "", buf)
-			case *HttpError: // A kind of http panic that just returns a response code and headers
+			case *HttpError:// A kind of http panic that just returns a response code and headers
+				headers = v.headers
+				httpErrCode = v.errCode
+			case HttpError:
 				headers = v.headers
 				httpErrCode = v.errCode
 			default:
@@ -163,7 +166,7 @@ func (m *PageManager) RunPage(ctx context.Context, buf *bytes.Buffer) (headers m
 			return nil, 403
 		} else if e.Err == FrameworkErrRedirect {
 			page.SetResponseHeader("Location", e.Location)
-			return page.responseHeader, 303
+			return page.gatherResponsHeaders(), 303
 		}
 	}
 
@@ -174,7 +177,7 @@ func (m *PageManager) RunPage(ctx context.Context, buf *bytes.Buffer) (headers m
 		m.makeErrorResponse(ctx, newRunError(ctx, err), html, buf)
 		return
 	}
-	return page.responseHeader, page.responseError
+	return page.gatherResponsHeaders(), page.responseError
 }
 
 func (m *PageManager) cleanup(p *Page) {
@@ -209,8 +212,9 @@ func (e *HttpError) SetResponseHeader(key, value string) {
 	}
 }
 
-// Send will cause the page to error with the given http error code.
-func (e *HttpError) Send(errCode int) {
+// ReplyWithHttpError will cause the page to error with the given http error code.
+func ReplyWithHttpError(errCode int) {
+	e := HttpError{}
 	e.errCode = errCode
 	panic(e)
 }
@@ -222,5 +226,6 @@ func (e *HttpError) Send(errCode int) {
 func Redirect(url string) {
 	e := HttpError{}
 	e.SetResponseHeader("Location", url)
-	e.Send(303)
+	e.errCode = 303
+	panic(e)
 }
