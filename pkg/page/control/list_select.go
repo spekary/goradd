@@ -222,9 +222,11 @@ func (l *SelectList) getItemsHtml(items []*ListItem) string {
 }
 
 // SetData overrides the default data setter to add objects to the item list.
+//
 // The result is kept in memory currently.
-// ItemLister, ItemIDer, Labeler or Stringer types. This function can accept one or more lists of items, or
-// single items.
+// This function can accept one or more lists of items, or
+// single items of ItemLister, ItemIDer, Labeler or Stringer types.
+// The selected value is not changed, so be sure to set it after calling this.
 func (l *SelectList) SetData(data interface{}) {
 	kind := reflect.TypeOf(data).Kind()
 	if !(kind == reflect.Slice || kind == reflect.Array) {

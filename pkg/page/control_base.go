@@ -99,7 +99,7 @@ type DataConnector interface {
 // to present a choice of items to the user to select from. The Load method will be called whenever the entire control
 // gets redrawn.
 type DataLoader interface {
-	Load(ctx context.Context) []interface{}
+	Load(ctx context.Context, i ControlI) []interface{}
 }
 
 

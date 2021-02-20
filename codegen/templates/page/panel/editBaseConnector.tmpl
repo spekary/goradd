@@ -44,7 +44,7 @@ func (c {{= cd.Connector }}) Update(i page.ControlI, data interface{}) {
 
         if provider,ok := cd.Generator.(generator.ProviderGenerator); ok {
 {{
-func (c {{= cd.Connector }}) Load(ctx context.Context) []interface{} {
+func (c {{= cd.Connector }}) Load(ctx context.Context, i page.ControlI) []interface{} {
 {{= provider.GenerateProvider(col, cd) }}
 }
 
@@ -102,7 +102,7 @@ func (c {{= cd.Connector }}) Update(i page.ControlI, data interface{}) {
 
     if provider,ok := cd.Generator.(generator.ProviderGenerator); ok {
 {{
-func (c {{= cd.Connector }}) Load(ctx context.Context) []interface{} {
+func (c {{= cd.Connector }}) Load(ctx context.Context, i page.ControlI) []interface{} {
 {{= provider.GenerateProvider(rr, cd) }}
 }
 

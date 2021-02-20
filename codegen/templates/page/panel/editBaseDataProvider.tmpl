@@ -14,20 +14,22 @@ for _,col := range t.Columns {
         if _, ok := cd.Generator.(generator.ProviderGenerator); ok {
 {{
     case "{{= cd.ControlID }}":
-        var items []interface{}
+        if dl,ok := s.DataConnector().(page.DataLoader); ok {
+            var items []interface{}
 {{if col.IsNullable}}
-        items = {{= ctrlPkg }}.NoSelectionItemList()
+            items = {{= ctrlPkg }}.NoSelectionItemList()
 {{else}}
     {{if col.IsType() }}
-        if p.{{= t.GoName }} == nil || int(p.{{= t.GoName }}.{{= col.ReferenceFunction() }}()) == 0 {
+            if p.{{= t.GoName }} == nil || int(p.{{= t.GoName }}.{{= col.ReferenceFunction() }}()) == 0 {
     {{else}}
-        if p.{{= t.GoName }} == nil || p.{{= t.GoName }}.{{= col.GoName }}() == {{= col.ColumnType.DefaultValue() }} {
+            if p.{{= t.GoName }} == nil || p.{{= t.GoName }}.{{= col.GoName }}() == {{= col.ColumnType.DefaultValue() }} {
     {{if}}
-            items = {{= ctrlPkg }}.SelectOneItemList()
-        }
+                items = {{= ctrlPkg }}.SelectOneItemList()
+            }
 {{if}}
-        items = append(items, s.DataConnector().(page.DataLoader).Load(ctx)...)
-        s.SetData(items)
+            items = append(items, dl.Load(ctx, s.(page.ControlI))...)
+            s.SetData(items)
+       }
 }}
         }
     }
@@ -39,9 +41,11 @@ for _,rr := range t.ReverseReferences {
     if _, ok := cd.Generator.(generator.ProviderGenerator); ok {
 {{
     case "{{= cd.ControlID }}":
-        var items []interface{}
-        items = append(items, s.DataConnector().(page.DataLoader).Load(ctx)...)
-        s.SetData(items)
+        if dl,ok := s.DataConnector().(page.DataLoader); ok {
+            var items []interface{}
+            items = append(items, dl.Load(ctx, s.(page.ControlI))...)
+            s.SetData(items)
+        }
 }}
     }
 }
