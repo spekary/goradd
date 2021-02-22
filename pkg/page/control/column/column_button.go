@@ -95,7 +95,7 @@ type ButtonColumnCreator struct {
 	ID string
 	// Title is the static title string to use in the header row
 	Title string
-	// IconHtml specifies the html to put inside the button
+	// ButtonHtml specifies the html to put inside the button
 	ButtonHtml string
 	// ButtonAttributes lets you set the button attributes how you want.
 	ButtonAttributes html.Attributes
