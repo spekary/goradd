@@ -1,0 +1,39 @@
+//create.tmpl
+{{
+
+// create{{= t.GoName }} creates a new {{= t.GoName }} in the database
+func create{{= t.GoName }}(w http.ResponseWriter, r *http.Request) {
+	o := model.New{{= t.GoName }}()
+	body := http2.DecodeJSONBody(w, r, config.MaxApiRequestBytes)
+
+{{# TODO: Potentially accept an array of objects in the future }}
+	if s,ok := body.(map[string]interface{}); !ok {
+		msg := fmt.Sprintf("Request body must be a JSON object")
+		http2.SendErrorMessage(msg, http.StatusBadRequest)
+	} else {
+		err := o.UnmarshalStringMap(s)
+		if err != nil {
+			http2.SendErrorMessage(err.Error(), http.StatusBadRequest)
+		}
+
+		if o.PrimaryKey() != "" {
+			if model.Has{{= t.GoName }}(r.Context(), o.PrimaryKey()) {
+				http2.SendErrorMessage("Cannot create a record with a key that already exists.", http.StatusConflict)
+			}
+		}
+		o.Save(r.Context())
+
+        // Write response
+        s,_ := o.MarshalJSON()
+        if _,err := w.Write(s); err != nil {
+            http2.SendErrorMessage(err.Error(), http.StatusInternalServerError)
+        }
+
+        w.Header().Set("Location", {{= t.GoName }}Path + "/" + o.PrimaryKey())
+        w.Header().Set("Content-Type", "application/json")
+        w.WriteHeader(http.StatusCreated)
+        _,_ = w.Write(s)
+	}
+}
+
+}}

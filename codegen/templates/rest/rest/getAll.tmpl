@@ -1,0 +1,18 @@
+//getAll.tmpl
+{{
+
+// getAll{{= t.GoPlural }} processes a get request when no specific {{= t.GoName }}
+// has been requested.
+func getAll{{= t.GoPlural }}(w http.ResponseWriter, r *http.Request) {
+    q := model.Query{{= t.GoPlural }}(r.Context())
+    data := q.Load()
+
+    w.Header().Add("Content-Type", "application/json")
+    encoder := json.NewEncoder(w)
+    err := encoder.Encode(data)
+    if err != nil {
+        panic(err)
+    }
+}
+
+}}

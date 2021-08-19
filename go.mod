@@ -14,6 +14,7 @@ require (
 	github.com/spf13/cobra v0.0.3
 	github.com/stretchr/testify v1.4.0
 	golang.org/x/text v0.3.6
+	github.com/elnormous/contenttype v1.0.0
 )
 
 go 1.16

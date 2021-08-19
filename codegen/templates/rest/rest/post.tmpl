@@ -1,0 +1,16 @@
+//init.tmpl
+{{
+
+// post{{= t.GoPlural }} processes a POST request for {{= t.GoName }} objects.
+func post{{= t.GoPlural }}(w http.ResponseWriter, r *http.Request) {
+    if len(r.URL.Path) <= 1 {
+        create{{= t.GoName }}(w,r)
+    } else {
+        //associate{{= t.GoName }}(w,r)
+    }
+}
+
+{{: create.tmpl }}
+{{# associate.tmpl }}
+
+}}

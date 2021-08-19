@@ -1,0 +1,16 @@
+//init.tmpl
+{{
+
+// get{{= t.GoPlural }} processes a GET request for {{= t.GoName }} objects.
+func get{{= t.GoPlural }}(w http.ResponseWriter, r *http.Request) {
+    if len(r.URL.Path) <= 1 {
+        getAll{{= t.GoPlural }}(w,r)
+    } else {
+        get1{{= t.GoName }}(w,r)
+    }
+}
+
+{{: getAll.tmpl }}
+{{: get1.tmpl }}
+
+}}

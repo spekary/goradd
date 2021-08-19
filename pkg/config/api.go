@@ -5,6 +5,7 @@ import "net/http"
 // ApiPrefix is the url prefix that indicates this is an API call, like a REST or GraphQL call.
 // Override this in your goradd_project/config package to change it.
 var ApiPrefix = "/api"
+var MaxApiRequestBytes int64 = 1048576 // 1MB default
 
 // The ApiManager is a singleton global that manages the deployment of api handlers,
 // like REST or GraphQL handlers.

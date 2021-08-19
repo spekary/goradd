@@ -1,0 +1,36 @@
+package template
+
+import (
+	"github.com/goradd/goradd/codegen/generator"
+	"github.com/goradd/goradd/pkg/config"
+	"bytes"
+	"github.com/goradd/goradd/pkg/orm/db"
+	"strings"
+)
+
+func init() {
+	t := RestTemplate {
+		generator.Template {
+			Overwrite: true,
+		},
+	}
+	generator.AddTableTemplate(&t)
+}
+
+type RestTemplate struct {
+	generator.Template
+}
+
+func (n *RestTemplate) FileName(key string, t generator.TableType) string {
+    var targetDir string
+    targetDir = config.ProjectDir() + "/gen"
+	return targetDir + "/" + key + "/rest/" + t.GoPlural + ".go"
+}
+
+func (n *RestTemplate) GenerateTable(codegen generator.CodeGenerator, dd *db.Database, t generator.TableType, buf *bytes.Buffer) {
+	{{: "rest/rest.tmpl" }}
+}
+
+func (n *RestTemplate) Overwrite() bool {
+	return n.Template.Overwrite
+}

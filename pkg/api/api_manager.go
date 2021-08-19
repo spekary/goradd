@@ -49,7 +49,7 @@ func (a DefaultApiManager) Use() {
 // RegisterPattern associates the given URL path with the given handler.
 // Call this from an init() function. Whenever a user navigates to the given pattern, the
 // handler will be called. Note that the pattern should NOT include the ApiPathPrefix.
-func RegisterPattern(pattern string, handler http.HandlerFunc) {
+func RegisterPattern(pattern string, handler http.Handler) {
 	if config.ApiManager == nil {
 		panic ("the ApiManager has not been initialized")
 	}
