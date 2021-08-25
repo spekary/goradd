@@ -1,4 +1,4 @@
-//init.tmpl
+// post.tmpl
 {{
 
 // post{{= t.GoPlural }} processes a POST request for {{= t.GoName }} objects.
@@ -11,6 +11,8 @@ func post{{= t.GoPlural }}(w http.ResponseWriter, r *http.Request) {
 }
 
 {{: create.tmpl }}
+
+{{# handle situation where we are adding associated items to a particular item }}
 {{# associate.tmpl }}
 
 }}

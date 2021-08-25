@@ -1,0 +1,45 @@
+// replace.tmpl
+{{
+
+// replace{{= t.GoName }} replaces the {{= t.GoName }} object with the specified key
+// with the data given in the body of the request. Depending on how the database is structured,
+// associated data may get deleted, or just the links will be deleted.
+func replace{{= t.GoName }}(key string, w http.ResponseWriter, r *http.Request) {
+	o := model.Load{{= t.GoName }}(r.Context(), key)
+	if o == nil {
+	    msg := "{{= t.GoName }} not found"
+		http2.SendErrorMessage(msg, http.StatusNotFound)
+	}
+	body := http2.DecodeJSONBody(w, r, config.MaxApiRequestBytes)
+
+	if s,ok := body.(map[string]interface{}); !ok {
+		msg := fmt.Sprintf("Request body must be a JSON object")
+		http2.SendErrorMessage(msg, http.StatusBadRequest)
+	} else {
+	    o.Clear() // clear without resetting the pk
+		err := o.UnmarshalStringMap(s)
+		if err != nil {
+			http2.SendErrorMessage(err.Error(), http.StatusBadRequest)
+		}
+
+		if o.PrimaryKey() != ""  && o.PrimaryKey() != key {
+			http2.SendErrorMessage("If you provide a key in your data, it must be the same as the key specified in the URL.", http.StatusConflict)
+		}
+
+		{{# ToDo: allow new associations? }}
+		o.Save(r.Context())
+
+        // Write response
+        s,_ := o.MarshalJSON()
+        if _,err := w.Write(s); err != nil {
+            http2.SendErrorMessage(err.Error(), http.StatusInternalServerError)
+        }
+
+        w.Header().Set("Location", {{= t.GoName }}Path + "/" + o.PrimaryKey())
+        w.Header().Set("Content-Type", "application/json")
+        w.WriteHeader(http.StatusCreated)
+        _,_ = w.Write(s)
+	}
+}
+
+}}

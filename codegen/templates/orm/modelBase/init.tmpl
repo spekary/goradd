@@ -2,7 +2,7 @@
 {{
 
 
-// Initialize or re-initialize a {{= t.GoName }} database object to default values.
+// Initialize initializes a {{= t.GoName }} database object to default values.
 func (o *{{privateName}}Base) Initialize() {
 
 {{for _,col := range t.Columns}}
@@ -33,5 +33,37 @@ func (o *{{privateName}}Base) Initialize() {
 	o._restored = false
 }
 
+// Clear sets all values to default values, including breaking all associations.
+// However, it does not touch the primary key.
+//
+// If a reverse reference cannot be null, it is not broken.
+func (o *{{privateName}}Base) Clear() {
+{{for _,col := range t.Columns}}
+{{if !col.IsPk }}
+    o.Set{{= col.GoName }}( {{= col.DefaultValueAsValue() }})
+{{if}}
+{{for}}
+{{g
+for _,ref := range t.ReverseReferences {
+    if ref.IsNullable() {
+	    if ref.IsUnique() {
+{{
+	o.Set{{= ref.GoName }}(nil)
+}}
+        } else {
+{{
+	o.Set{{= ref.GoPlural }}(nil)
+}}
+	    }
+    }
+}
+
+for _,ref := range t.ManyManyReferences {
+{{
+	o.Set{{= ref.GoPlural }}(nil)
+}}
+}
+}}
+}
 
 }}

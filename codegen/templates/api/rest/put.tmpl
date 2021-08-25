@@ -1,0 +1,23 @@
+// put.tmpl
+{{
+
+// put{{= t.GoPlural }} processes a PUT request for {{= t.GoName }} objects.
+//
+func put{{= t.GoPlural }}(w http.ResponseWriter, r *http.Request) {
+    if len(r.URL.Path) <= 1 {
+        bulkReplace{{= t.GoName }}(w,r)
+    } else {
+        key, remainingPath := strings2.ShiftPath(r.URL.Path)
+        if remainingPath == "" {
+            replace{{= t.GoName }}(key[1:], w, r)
+        } else {
+            replace{{= t.GoName }}AssociatedValues(key, w, r)
+        }
+    }
+}
+
+{{: replace.tmpl }}
+{{: bulkReplace.tmpl }}
+{{: replaceAssociated.tmpl }}
+
+}}

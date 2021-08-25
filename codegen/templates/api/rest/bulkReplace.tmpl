@@ -1,0 +1,9 @@
+// bulkReplace.tmpl
+{{
+
+func bulkReplace{{= t.GoName }}(w http.ResponseWriter, r *http.Request) {
+    msg := "Operation not supported"
+    http2.SendErrorMessage(msg, http.StatusBadRequest)
+}
+
+}}

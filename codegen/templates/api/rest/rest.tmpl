@@ -17,6 +17,8 @@ import (
 {{if t.HasDateTime }}
     "github.com/goradd/goradd/pkg/datetime"
 {{if}}
+	"strings"
+    strings2 "github.com/goradd/goradd/pkg/strings"
 )
 
 }}
@@ -25,6 +27,6 @@ import (
 {{: handler.tmpl }}
 {{: get.tmpl }}
 {{: post.tmpl }}
-{{# put.tmpl }}
+{{: put.tmpl }}
 {{# delete.tmpl }}
 
