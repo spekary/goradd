@@ -9,14 +9,17 @@ func {{= t.GoName }}Handler(w http.ResponseWriter, r *http.Request) {
 		post{{= t.GoPlural}}(w, r)
     case http.MethodPut:
         put{{= t.GoPlural}}(w, r)
-	//case http.MethodDelete:
-		//delete{{= t.GoPlural}}(w, r)
+    //case http.MethodPatch:
+        //patch{{= t.GoPlural}}(w, r)
+	case http.MethodDelete:
+		delete{{= t.GoPlural}}(w, r)
 	default:
 		http2.SendMethodNotAllowed(
 		    http.MethodGet,
 		    http.MethodPost,
 		    http.MethodPut,
-		    //http.MethodDelete,
+		    //http.MethodPatch,
+		    http.MethodDelete,
 		)
 	}
 	return

@@ -1,0 +1,21 @@
+// getOne.tmpl
+{{
+
+func getOne{{= t.GoName }}(key string, w http.ResponseWriter, r *http.Request) {
+	q := model.Query{{= t.GoPlural }}(r.Context()).
+		Where(op.Equal(node.{{= t.GoName }}().PrimaryKeyNode(), key))
+
+	rec := q.Get()
+
+	if rec == nil {
+		http2.SendNotFound()
+	}
+    w.Header().Add("Content-Type", "application/json")
+    encoder := json.NewEncoder(w)
+    err := encoder.Encode(rec)
+    if err != nil {
+        panic(err)
+    }
+}
+
+}}

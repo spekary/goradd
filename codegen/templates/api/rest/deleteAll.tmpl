@@ -1,0 +1,12 @@
+// deleteAll.tmpl
+{{
+
+// deleteAll{{= t.GoPlural }} processes a DELETE request when no specific {{= t.GoName }}
+// has been specified.
+func deleteAll{{= t.GoPlural }}(w http.ResponseWriter, r *http.Request) {
+    q := model.Query{{= t.GoPlural }}(r.Context())
+    q.Delete()
+    w.WriteHeader(http.StatusNoContent)
+}
+
+}}

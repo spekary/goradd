@@ -1,0 +1,17 @@
+// deleteOne.tmpl
+{{
+
+func deleteOne{{= t.GoName }}(key string, w http.ResponseWriter, r *http.Request) {
+	q := model.Query{{= t.GoPlural }}(r.Context()).
+		Where(op.Equal(node.{{= t.GoName }}().PrimaryKeyNode(), key))
+
+	rec := q.Get() {{# TODO: limit fields to reduce data load }}
+	if rec == nil {
+		http2.SendNotFound()
+	} else {
+	    rec.Delete(r.Context())
+	    w.WriteHeader(http.StatusNoContent)
+	}
+}
+
+}}

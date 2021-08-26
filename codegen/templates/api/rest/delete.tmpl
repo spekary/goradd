@@ -1,0 +1,22 @@
+// delete.tmpl
+{{
+
+// delete{{= t.GoPlural }} processes a DELETE request for {{= t.GoName }} objects.
+func delete{{= t.GoPlural }}(w http.ResponseWriter, r *http.Request) {
+    if len(r.URL.Path) <= 1 {
+        deleteAll{{= t.GoPlural }}(w,r)
+    } else {
+        key, remainingPath := strings2.ShiftPath(r.URL.Path)
+        if remainingPath == "" {
+            deleteOne{{= t.GoName }}(key[1:], w, r)
+        } else {
+            delete{{= t.GoName }}AssociatedValues(key, w, r)
+        }
+    }
+}
+
+{{: deleteOne.tmpl }}
+{{: deleteAll.tmpl }}
+{{: deleteAssociated.tmpl }}
+
+}}

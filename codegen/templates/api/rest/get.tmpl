@@ -6,11 +6,17 @@ func get{{= t.GoPlural }}(w http.ResponseWriter, r *http.Request) {
     if len(r.URL.Path) <= 1 {
         getAll{{= t.GoPlural }}(w,r)
     } else {
-        get1{{= t.GoName }}(w,r)
+        key, remainingPath := strings2.ShiftPath(r.URL.Path)
+        if remainingPath != "" {
+            get{{= t.GoName }}AssociatedValues(key, w, r)
+        } else {
+            getOne{{= t.GoName }}(key, w,r)
+        }
     }
 }
 
 {{: getAll.tmpl }}
-{{: get1.tmpl }}
+{{: getOne.tmpl }}
+{{: getAssociated.tmpl }}
 
 }}

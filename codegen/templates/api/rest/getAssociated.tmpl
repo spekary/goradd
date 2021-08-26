@@ -1,0 +1,9 @@
+// getAssociated.tmpl
+{{
+
+func get{{= t.GoName }}AssociatedValues(key string, w http.ResponseWriter, r *http.Request) {
+    msg := "Operation not supported"
+    http2.SendErrorMessage(msg, http.StatusBadRequest)
+}
+
+}}
