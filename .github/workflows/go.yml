@@ -40,12 +40,16 @@ jobs:
     - name: Setup Databases
       run: |
         mysql -u${{ env.ROOT_DB_USER }} -h127.0.0.1 -e 'create database goradd;'
-        mysql -u${{ env.ROOT_DB_USER }} -h127.0.0.1 goradd < ./web/examples/db/mysql.sql
         mysql -u${{ env.ROOT_DB_USER }} -h127.0.0.1 -e 'create database goraddUnit;'
-        mysql -u${{ env.ROOT_DB_USER }} -h127.0.0.1 goraddUnit < ./internal/travis/db/goraddunit.mysql.sql
         mysql -u${{ env.ROOT_DB_USER }} -h127.0.0.1 -e "CREATE USER '${{ env.DB_USER }}'@'localhost' IDENTIFIED BY ''"
         mysql -u${{ env.ROOT_DB_USER }} -h127.0.0.1 -e "GRANT ALL PRIVILEGES ON *.* TO '${{ env.DB_USER }}'@'localhost'"
         mysql -u${{ env.ROOT_DB_USER }} -h127.0.0.1 -e "FLUSH PRIVILEGES"
+        mysql -u${{ env.ROOT_DB_USER }} -h127.0.0.1
+        use goradd;
+        source ./web/examples/db/mysql.sql;
+        use goraddUnit;
+        source ./internal/travis/db/goraddunit.mysql.sql;
+        quit;
 
     - name: Build
       run: |
