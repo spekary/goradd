@@ -35,7 +35,7 @@ jobs:
     - name: Start Mysql
       uses: shogo82148/actions-setup-mysql@v1
       with:
-        mysql-version: '8.0'
+        mysql-version: '5.7'
 
     - name: Setup Databases
       run: |
