@@ -50,10 +50,11 @@ jobs:
     - name: Build
       run: go install
 
-    - name: Install Ubuntu
+    - name: Install on Ubuntu
       working-directory: /home/runner
       if: ${{ matrix.os == 'ubuntu-latest' }}
       run: |
+       printenv
        cp -r ${RUNNER_WORKSPACE}/goradd/internal/install/goradd-project ${HOME}
        cp -r ${RUNNER_WORKSPACE}/goradd/internal/travis/goradd-test ${HOME}
        mv ./goradd-project/gomod.txt ./goradd-project/go.mod
@@ -66,6 +67,7 @@ jobs:
       working-directory: /home/runner
       if: ${{ matrix.os == 'windows-latest' }}
       run: |
+       set
        move %RUNNER_WORKSPACE%/goradd/internal/install/goradd-project %HOME%
        move %RUNNER_WORKSPACE%/goradd/internal/travis/goradd-test %HOME%
        rename ./goradd-project/gomod.txt go.mod
