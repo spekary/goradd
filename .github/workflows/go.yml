@@ -19,8 +19,17 @@ jobs:
       ROOT_DB_USER: root
       DB_USER: travis
     steps:
-    - name: cwd
-      run: pwd
+    - name: Print Ubuntu Environment
+      if: ${{ matrix.os == 'ubuntu-latest' }}
+      run: |
+        pwd
+        printenv
+        
+    - name: Print Windows Environment
+      if: ${{ matrix.os == 'windows-latest' }}
+      run: |
+        pwd
+        set
 
     - uses: actions/checkout@v2
 
