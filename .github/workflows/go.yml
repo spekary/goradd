@@ -18,8 +18,10 @@ jobs:
       GOFLAGS: -mod=mod
       ROOT_DB_USER: root
       DB_USER: travis
-      home: $HOME
     steps:
+    - name: Setup Environment
+      run: echo "home=$HOME" >> $GITHUB_ENV
+      
     - uses: actions/checkout@v2
 
     - name: Set up Go
