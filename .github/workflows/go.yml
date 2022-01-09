@@ -54,8 +54,8 @@ jobs:
       working-directory: /home/runner
       if: ${{ matrix.os == 'ubuntu-latest' }}
       run: |
-       cp -r ./internal/install/goradd-project ${HOME}
-       cp -r ./internal/travis/goradd-test ${HOME}
+       cp -r ${RUNNER_WORKSPACE}/internal/install/goradd-project ${HOME}
+       cp -r ${RUNNER_WORKSPACE}/internal/travis/goradd-test ${HOME}
        mv ./goradd-project/gomod.txt ./goradd-project/go.mod
        mv ./goradd-test/gomod.txt ./goradd-test/go.mod
        echo "replace github.com/goradd/goradd => ${RUNNER_WORKSPACE}/goradd" >> ./goradd-project/go.mod
@@ -66,8 +66,8 @@ jobs:
       working-directory: /home/runner
       if: ${{ matrix.os == 'windows-latest' }}
       run: |
-       move ./internal/install/goradd-project %HOME%
-       move ./internal/travis/goradd-test %HOME%
+       move %RUNNER_WORKSPACE%/internal/install/goradd-project %HOME%
+       move %RUNNER_WORKSPACE%/internal/travis/goradd-test %HOME%
        rename ./goradd-project/gomod.txt go.mod
        rename ./goradd-test/gomod.txt go.mod
        echo "replace github.com/goradd/goradd => %RUNNER_WORKSPACE%/goradd" >> ./goradd-project/go.mod
