@@ -18,19 +18,8 @@ jobs:
       GOFLAGS: -mod=mod
       ROOT_DB_USER: root
       DB_USER: travis
+      home: $HOME
     steps:
-    - name: Print Ubuntu Environment
-      if: ${{ matrix.os == 'ubuntu-latest' }}
-      run: |
-        pwd
-        printenv
-        
-    - name: Print Windows Environment
-      if: ${{ matrix.os == 'windows-latest' }}
-      run: |
-        pwd
-        gci env:* | sort-object name
-
     - uses: actions/checkout@v2
 
     - name: Set up Go
@@ -59,46 +48,31 @@ jobs:
     - name: Build
       run: go install
 
-    - name: Install on Ubuntu
-      working-directory: /home/runner
-      if: ${{ matrix.os == 'ubuntu-latest' }}
+    - name: Install
+      working-directory: ${{ env.home }}
       run: |
-       printenv
-       cp -r ${RUNNER_WORKSPACE}/goradd/internal/install/goradd-project ${HOME}
-       cp -r ${RUNNER_WORKSPACE}/goradd/internal/travis/goradd-test ${HOME}
+       cp -r ${{ github.workspace }}/goradd/internal/install/goradd-project .
+       cp -r ${{ github.workspace }}/goradd/internal/travis/goradd-test .
        mv ./goradd-project/gomod.txt ./goradd-project/go.mod
        mv ./goradd-test/gomod.txt ./goradd-test/go.mod
        echo "replace github.com/goradd/goradd => ${RUNNER_WORKSPACE}/goradd" >> ./goradd-project/go.mod
        echo "replace github.com/goradd/goradd => ${RUNNER_WORKSPACE}/goradd" >> ./goradd-test/go.mod
        goradd install -s2  # use the goradd tool to complete the install
 
-    - name: Install Windows
-      working-directory: /home/runner
-      if: ${{ matrix.os == 'windows-latest' }}
-      run: |
-       set
-       move %RUNNER_WORKSPACE%/goradd/internal/install/goradd-project %HOME%
-       move %RUNNER_WORKSPACE%/goradd/internal/travis/goradd-test %HOME%
-       rename ./goradd-project/gomod.txt go.mod
-       rename ./goradd-test/gomod.txt go.mod
-       echo "replace github.com/goradd/goradd => %RUNNER_WORKSPACE%/goradd" >> ./goradd-project/go.mod
-       echo "replace github.com/goradd/goradd => %RUNNER_WORKSPACE%/goradd" >> ./goradd-test/go.mod
-       goradd install -s2  # use the goradd tool to complete the install
-
     - name: Codegen
-      working-directory: /home/runner/goradd-test/codegen
+      working-directory: ${{ env.home }}/goradd-test/codegen
       run: go generate build.go
 
     - name: Unit Test Packages
-      working-directory: /home/runner/goradd-project
+      working-directory: ${{ env.home }}/goradd-project
       run: go test github.com/goradd/goradd/pkg/...
 
     - name: Unit Test Database
-      working-directory: /home/runner/goradd-test
-      run: go test ./dbtest
+      working-directory: ${{ env.home }}/goradd-test
+      run: go test dbtest
 
     - name: Browser Based Tests
-      working-directory: /home/runner/goradd-test
+      working-directory: ${{ env.home }}/goradd-test
       run: ${RUNNER_WORKSPACE}/goradd/internal/travis/ci/test.sh
 
 
