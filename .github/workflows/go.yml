@@ -33,7 +33,9 @@ jobs:
       run: google-chrome-stable http://localhost:8000?all=1 &
 
     - name: Start Mysql
-      run: sudo /etc/init.d/mysql start
+      uses: shogo82148/actions-setup-mysql@v1
+      with:
+        mysql-version: '8.0'
 
     - name: Setup Databases
       run: |
