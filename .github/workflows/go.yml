@@ -48,18 +48,30 @@ jobs:
         mysql -u${{ env.ROOT_DB_USER }} -h '127.0.0.1' -e 'source ./internal/travis/db/goraddunit.mysql.sql;' goraddUnit
 
     - name: Build
+      run: go install
+
+    - name: Install Ubuntu
+      working-directory: /home/runner
+      if: ${{ matrix.os == 'ubuntu-latest' }}
       run: |
-       go install
        cp -r ./internal/install/goradd-project ${HOME}
        cp -r ./internal/travis/goradd-test ${HOME}
-
-    - name: Install
-      working-directory: /home/runner
-      run: |
        mv ./goradd-project/gomod.txt ./goradd-project/go.mod
        mv ./goradd-test/gomod.txt ./goradd-test/go.mod
        echo "replace github.com/goradd/goradd => ${RUNNER_WORKSPACE}/goradd" >> ./goradd-project/go.mod
        echo "replace github.com/goradd/goradd => ${RUNNER_WORKSPACE}/goradd" >> ./goradd-test/go.mod
+       goradd install -s2  # use the goradd tool to complete the install
+
+    - name: Install Windows
+      working-directory: /home/runner
+      if: ${{ matrix.os == 'windows-latest' }}
+      run: |
+       move ./internal/install/goradd-project %HOME%
+       move ./internal/travis/goradd-test %HOME%
+       rename ./goradd-project/gomod.txt go.mod
+       rename ./goradd-test/gomod.txt go.mod
+       echo "replace github.com/goradd/goradd => %RUNNER_WORKSPACE%/goradd" >> ./goradd-project/go.mod
+       echo "replace github.com/goradd/goradd => %RUNNER_WORKSPACE%/goradd" >> ./goradd-test/go.mod
        goradd install -s2  # use the goradd tool to complete the install
 
     - name: Codegen
