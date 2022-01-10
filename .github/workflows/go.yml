@@ -86,7 +86,7 @@ jobs:
       run: |
         go build goradd-test
         Start-Job -Name "testserver" -ScriptBlock { .\goradd-test.exe }
-        timeout /nobreak 10
+        Start timeout 5
         Start-Process "Chrome" "http://localhost:8000/goradd/Test.g?all=1 --headless --remote-debugging-port=9222"
         Wait-Job -Name "testserver"
         Receive-Job -Name "testserver"
