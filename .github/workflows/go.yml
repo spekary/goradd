@@ -29,9 +29,6 @@ jobs:
       with:
         go-version: 1.17
 
-    - name: Start Chrome
-      run: google-chrome-stable http://localhost:8000?all=1 &
-
     - name: Start Mysql
       uses: shogo82148/actions-setup-mysql@v1
       with:
