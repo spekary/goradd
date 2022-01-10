@@ -13,14 +13,14 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest]
+        os: [ubuntu-latest, windows-latest]
     env:
       GOFLAGS: -mod=mod
       ROOT_DB_USER: root
       DB_USER: travis
     steps:
     - name: Setup Environment
-      run: echo "home=$HOME" >> $GITHUB_ENV
+      run: echo "home=$HOME" >> $env:GITHUB_ENV
       
     - uses: actions/checkout@v2
 
