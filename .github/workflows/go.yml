@@ -13,7 +13,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [windows-latest]
     env:
       GOFLAGS: -mod=mod
       ROOT_DB_USER: root
@@ -83,7 +83,13 @@ jobs:
     - name: Browser Based Tests on Windows
       working-directory: ${{ env.home }}/goradd-test
       if: ${{ runner.os == 'Windows' }}
-      run: ${{ github.workspace }}/internal/travis/ci/test.cmd
+      run: |
+        go build goradd-test
+        Start-Job -Name "testserver" -ScriptBlock { .\goradd-test.exe }
+        timeout /nobreak 10
+        Start-Process "Chrome" "http://localhost:8000/goradd/Test.g?all=1 --headless --remote-debugging-port=9222"
+        Wait-Job -Name "testserver"
+        Receive-Job -Name "testserver"
 
 
 
