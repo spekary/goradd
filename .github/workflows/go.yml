@@ -78,7 +78,7 @@ jobs:
     - name: Browser Based Tests on Linux
       working-directory: ${{ env.home }}/goradd-test
       if: ${{ runner.os == 'Linux' }}
-      run: ./test.sh
+      run: bash test.sh
       
     - name: Browser Based Tests on Windows
       working-directory: ${{ env.home }}/goradd-test
