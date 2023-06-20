@@ -12,7 +12,7 @@ import (
 	http2 "github.com/goradd/goradd/pkg/http"
 	grlog "github.com/goradd/goradd/pkg/log"
 	"github.com/goradd/goradd/pkg/messageServer"
-	"github.com/goradd/goradd/pkg/messageServer/ws"
+	"github.com/goradd/goradd/pkg/messageServer/sse"
 	"github.com/goradd/goradd/pkg/orm/broadcast"
 	"github.com/goradd/goradd/pkg/orm/db"
 	"github.com/goradd/goradd/pkg/session"
@@ -123,7 +123,7 @@ func (a *Application) SetupSessionManager() {
 // You can use this mechanism to set up your own messaging system for application use too.
 func (a *Application) SetupMessenger() {
 	// The default sets up a websocket based messenger appropriate for development and single-server applications
-	messenger := new(ws.WsMessenger)
+	messenger := new(sse.SseMessenger)
 	messageServer.Messenger = messenger
 	messenger.Start()
 }
@@ -139,8 +139,8 @@ func (a *Application) SetupPaths() {
 		http2.RegisterPrefixHandler("/debug/pprof/trace", http.HandlerFunc(pprof.Trace))
 	}
 
-	if config.WebsocketMessengerPrefix != "" {
-		http2.RegisterPrefixHandler(config.WebsocketMessengerPrefix, http.HandlerFunc(WebsocketMessengerHandler))
+	if config.MessengerPrefix != "" {
+		http2.RegisterPrefixHandler(config.MessengerPrefix, http.HandlerFunc(MessengerHandler))
 	}
 }
 
@@ -323,13 +323,13 @@ func (a *Application) ServeWebsocketMessengerHandler(next http.Handler) http.Han
 		}
 
 		// Inject the pagestate as the client ID so the next handler down can read it
-		ctx := context.WithValue(r.Context(), goradd.WebSocketContext, pagestate)
-		messageServer.Messenger.(*ws.WsMessenger).WebSocketHandler().ServeHTTP(w, r.WithContext(ctx))
+		ctx := context.WithValue(r.Context(), goradd.MessengerContext, pagestate)
+		messageServer.Messenger.(*sse.SseMessenger).WebSocketHandler().ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 
-// WebsocketMessengerHandler is a handler for Websockets.
-func WebsocketMessengerHandler(w http.ResponseWriter, r *http.Request) {
+// MessengerHandler is a handler for the messenger service.
+func MessengerHandler(w http.ResponseWriter, r *http.Request) {
 	pagestate := r.FormValue("id")
 
 	if !page.HasPage(pagestate) {
@@ -338,8 +338,8 @@ func WebsocketMessengerHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Inject the pagestate as the client ID so the next handler down can read it
-	ctx := context.WithValue(r.Context(), goradd.WebSocketContext, pagestate)
-	messageServer.Messenger.(*ws.WsMessenger).WebSocketHandler().ServeHTTP(w, r.WithContext(ctx))
+	ctx := context.WithValue(r.Context(), goradd.MessengerContext, pagestate)
+	messageServer.Messenger.(*sse.SseMessenger).Server.ServeHTTP(w, r.WithContext(ctx))
 }
 
 // AccessLogHandler simply logs requests.

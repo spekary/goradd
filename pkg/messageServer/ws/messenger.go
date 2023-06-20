@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"github.com/goradd/goradd/pkg/config"
 	"github.com/goradd/goradd/pkg/goradd"
-	"github.com/goradd/html5tag"
 	http2 "github.com/goradd/goradd/pkg/http"
 	_ "github.com/goradd/goradd/pkg/messageServer/ws/assets"
+	"github.com/goradd/html5tag"
 	"net/http"
 	"path"
 )
@@ -22,7 +22,7 @@ func (m *WsMessenger) Start() *WebSocketHub {
 }
 
 func (m *WsMessenger) JavascriptInit() string {
-	return fmt.Sprintf("goradd.initMessagingClient(%q);\n", http2.MakeLocalPath(config.WebsocketMessengerPrefix))
+	return fmt.Sprintf("goradd.initMessagingClient(%q);\n", http2.MakeLocalPath(config.MessengerPrefix))
 }
 
 func (m *WsMessenger) JavascriptFiles() map[string]html5tag.Attributes {
@@ -44,7 +44,7 @@ func (m *WsMessenger) Send(channel string, message string) {
 // Request
 func (m *WsMessenger) WebSocketHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		clientID := r.Context().Value(goradd.WebSocketContext).(string)
+		clientID := r.Context().Value(goradd.MessengerContext).(string)
 		serveWs(m.hub, w, r, clientID)
 	})
 }

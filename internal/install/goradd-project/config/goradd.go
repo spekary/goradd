@@ -26,7 +26,7 @@ func initGoradd() {
 	}
 
 	//config.ApiPrefix = "/myapi" // Uncomment this to change the prefix for api calls (aka REST calls). The default is "/api".
-	//config.WebsocketMessengerPrefix = "/ws/" // Sets the websocket messenger prefix. Set to blank to turn off the websocket messenger.
+	//config.MessengerPrefix = "/ws/" // Sets the websocket messenger prefix. Set to blank to turn off the websocket messenger.
 	// Otherwise, set to whatever prefix will not conflict with the rest of your app.
 
 }

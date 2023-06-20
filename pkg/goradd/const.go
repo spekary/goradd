@@ -10,7 +10,7 @@ type ContextKey string
 const (
 	PageContext      = ContextKey("goradd.page")
 	BufferContext    = ContextKey("goradd.buf")
-	WebSocketContext = ContextKey("goradd.ws")
+	MessengerContext = ContextKey("goradd.msg")
 )
 
 // Default session values

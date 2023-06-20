@@ -1,18 +1,19 @@
-/*
-Package messageServer implements a general purpose messaging platform based on the gorilla
-websocket implementation. The platform is similar to other messaging platforms like pubnub,
-in that it is channel based.
+// Package messageServer implements a one-way messaging service that sends messages to the http client.
+// There are many mechanisms for doing this, and new ones are evolving constantly.
+// Goradd uses this service to communicate to the client that data has changed and it should initiate a
+// data refresh. However, it is general purpose enough that the application or specific controls could make
+// use of it as well to notify the client of anything.
+//
+// The original implementation used WebSockets and was based on the gorilla websocket library. That library
+// has been deprecated, and the new default uses a server-side events library. However, MTTQ, NATS, PubNub
+// and other implementations are possible.
 
-This means that you can replace it with the distributed messaging platform of your choice as your app grows.
-
-See the web/assets/js/goradd-ws.js for the client side.
-*/
 package messageServer
 
 import (
 	"encoding/json"
-	"github.com/goradd/html5tag"
 	"github.com/goradd/goradd/pkg/log"
+	"github.com/goradd/html5tag"
 )
 
 var Messenger MessengerI
@@ -22,7 +23,7 @@ type MessengerI interface {
 	JavascriptInit() string
 	// Send sends a message to the given channel
 	Send(channel string, message string)
-	// JavascriptFiles returns file names and attributes used to embed the need javascript files for your messenger
+	// JavascriptFiles returns file names and attributes used to embed the javascript files needed by your messenger
 	JavascriptFiles() map[string]html5tag.Attributes
 }
 

@@ -6,12 +6,11 @@ package config
 // all assets get copied. set to blank to turn off the default asset management.
 var AssetPrefix = "/assets/"
 
-// WebsocketMessengerPrefix is the url prefix that indicates this is a Websocket call to our messenger service.
-//
-// The default turns on Websockets and uses this to implement the Watcher and Messenger
-// mechanisms. Override this in the goradd_project/config/goradd.go file to set to the value of your choice,
-// or set to blank to turn off handling of websockets.
-var WebsocketMessengerPrefix = "/ws/"
+// MessengerPrefix is the url prefix that indicates this is a call to our messenger service.
+// Goradd uses the Messenger service to implement the Watcher mechanism.
+// Override this in the goradd_project/config/goradd.go file to set to the value of your choice,
+// or set to blank to turn off handling of messages.
+var MessengerPrefix = "/msg/"
 
 // Minify controls whether we try to strip out unnecessary whitespace from our HTML output
 var Minify bool = !Debug
@@ -33,6 +32,6 @@ var DefaultDateTimeEntryFormat = "1/2/06 3:04 pm"
 
 // SelectOneString is used in selection lists as the default item to indicate that a selection is required but has not yet been made
 var SelectOneString = "- Select One -"
+
 // NoSelectionString is used in selection lists as the item that indicates no selection when a selection is not required
 var NoSelectionString = "-"
-
