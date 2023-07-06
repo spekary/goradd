@@ -2,13 +2,11 @@
 package app
 
 import (
-	"context"
 	"fmt"
 	"github.com/alexedwards/scs/v2"
 	"github.com/alexedwards/scs/v2/memstore"
 	"github.com/goradd/goradd/pkg/base"
 	"github.com/goradd/goradd/pkg/config"
-	"github.com/goradd/goradd/pkg/goradd"
 	http2 "github.com/goradd/goradd/pkg/http"
 	grlog "github.com/goradd/goradd/pkg/log"
 	"github.com/goradd/goradd/pkg/messageServer"
@@ -122,7 +120,7 @@ func (a *Application) SetupSessionManager() {
 //
 // You can use this mechanism to set up your own messaging system for application use too.
 func (a *Application) SetupMessenger() {
-	// The default sets up a websocket based messenger appropriate for development and single-server applications
+	// The default sets up a server-sent event based messenger appropriate for development and single-server applications
 	messenger := new(sse.SseMessenger)
 	messageServer.Messenger = messenger
 	messenger.Start()
@@ -140,7 +138,8 @@ func (a *Application) SetupPaths() {
 	}
 
 	if config.MessengerPrefix != "" {
-		http2.RegisterPrefixHandler(config.MessengerPrefix, http.HandlerFunc(MessengerHandler))
+		// Put the messenger at a particular url
+		http2.RegisterPrefixHandler(config.MessengerPrefix, a.ServeMessenger(messageServer.Messenger.(*sse.SseMessenger)))
 	}
 }
 
@@ -311,35 +310,19 @@ func (a *Application) ServePatternMux(next http.Handler) http.Handler {
 	return http2.UsePatternMuxer(http2.NewMux(), next)
 }
 
-// ServeWebsocketMessengerHandler is the authorization handler for watcher requests.
+// ServeMessenger is the authorization handler for watcher requests.
 // It uses the pagestate as the client id, verifying the page state is valid
-func (a *Application) ServeWebsocketMessengerHandler(next http.Handler) http.Handler {
+func (a *Application) ServeMessenger(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		pagestate := r.FormValue("id")
 
 		if !page.HasPage(pagestate) {
 			// The page manager has no record of the pagestate, so either it is expired or never existed
-			return // TODO: return error?
+			w.WriteHeader(http.StatusNoContent) // Tells the event source to stop reconnecting and shut down
+			return
 		}
-
-		// Inject the pagestate as the client ID so the next handler down can read it
-		ctx := context.WithValue(r.Context(), goradd.MessengerContext, pagestate)
-		messageServer.Messenger.(*sse.SseMessenger).WebSocketHandler().ServeHTTP(w, r.WithContext(ctx))
+		next.ServeHTTP(w, r)
 	})
-}
-
-// MessengerHandler is a handler for the messenger service.
-func MessengerHandler(w http.ResponseWriter, r *http.Request) {
-	pagestate := r.FormValue("id")
-
-	if !page.HasPage(pagestate) {
-		// The page manager has no record of the pagestate, so either it is expired or never existed
-		return // TODO: return error?
-	}
-
-	// Inject the pagestate as the client ID so the next handler down can read it
-	ctx := context.WithValue(r.Context(), goradd.MessengerContext, pagestate)
-	messageServer.Messenger.(*sse.SseMessenger).Server.ServeHTTP(w, r.WithContext(ctx))
 }
 
 // AccessLogHandler simply logs requests.

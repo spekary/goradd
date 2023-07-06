@@ -2,14 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package ws
+package sse
 
 import (
 	"github.com/goradd/goradd/pkg/log"
-	"time"
 )
 
-// clientMessage is the information that is passed to the client for each message
 type clientMessage struct {
 	Channel string `json:"channel"`
 	Message string `json:"message"`
@@ -20,120 +18,75 @@ type subscription struct {
 	channel  string
 }
 
-const (
-	// Time allowed to write a message to the peer.
-	writeWaitDefault = 2 * time.Second
-
-	// Time allowed to read the next pong message from the peer.
-	pongWaitDefault = 60 * time.Second
-
-	// Send pings to peer with this period. Must be less than pongWait.
-	pingPeriodDefault = (pongWaitDefault * 9) / 10
-
-	// Maximum message size allowed from peer.
-	maxMessageSizeDefault = 512
-)
-
-type WebSocketHub struct {
+type ServerSentEventHub struct {
 	// Channels that clients have subscribed to. Each channel points to a map of client IDs
-	channels map[string]map[string]bool
+	channels map[string]map[string]struct{}
 
 	// Registered clients, keyed by client ID
-	clients map[string]*Client
-
-	// Inbound messages from the clients.
-	//Broadcast chan []byte
+	clients map[string]*client
 
 	// Register requests from the clients.
-	register chan *Client
+	register chan *client
 
 	// Unregister requests from clients.
-	unregister chan *Client
+	unregister chan string
 
 	send chan clientMessage
 
 	subscribe chan subscription
-
-	// Time to wait for a write to complete
-	WriteWait time.Duration
-
-	// Time allowed to read the next pong message from the peer.
-	PongWait time.Duration
-
-	// Send pings to peer with this period. Must be less than pongWait.
-	PingPeriod time.Duration
-
-	// Maximum message size allowed from peer.
-	MaxMessageSize int64
 }
 
-func NewWebSocketHub() *WebSocketHub {
-	return &WebSocketHub{
-		//Broadcast:  make(chan []byte),
-		register:   make(chan *Client),
-		unregister: make(chan *Client),
+func NewServerSentEventHub() *ServerSentEventHub {
+	return &ServerSentEventHub{
+		register:   make(chan *client),
+		unregister: make(chan string),
 		send:       make(chan clientMessage),
-		clients:    make(map[string]*Client),
-		channels:	make(map[string]map[string]bool),
+		clients:    make(map[string]*client),
+		channels:   make(map[string]map[string]struct{}),
 		subscribe:  make(chan subscription),
-		WriteWait: writeWaitDefault,
-		PongWait: pongWaitDefault,
-		PingPeriod: pingPeriodDefault,
-		MaxMessageSize: maxMessageSizeDefault,
 	}
 }
 
-func (h *WebSocketHub) run() {
+func (h *ServerSentEventHub) run() {
 	for {
 		select {
 		case client := <-h.register:
-			log.Infof("New client registering - client ID: %s", client.clientID)
+			log.FrameworkDebugf("New client registering - client ID: %s", client.clientID)
 
-			if _,ok := h.clients[client.clientID]; ok {
+			if _, ok := h.clients[client.clientID]; ok {
 				// The same client is registering again. Unregister first.
 				h.unregisterClient(client.clientID)
 			}
 			h.clients[client.clientID] = client
 
-		case client := <-h.unregister:
-			log.Infof("Client unregistering clientID: %s", client.clientID)
-			h.unregisterClient(client.clientID)
+		case clientID := <-h.unregister:
+			log.Infof("client unregistering clientID: %s", clientID)
+			h.unregisterClient(clientID)
 
 		case msg := <-h.send:
 			if clientIDs, ok := h.channels[msg.Channel]; ok {
 				log.FrameworkDebugf("Sending to channel %s - %v", msg.Channel, msg.Message)
 
 				for clientID := range clientIDs {
-					if client,ok2 := h.clients[clientID]; ok2 {
+					if client, ok2 := h.clients[clientID]; ok2 {
 						client.send <- msg
 					}
 				}
 			} else {
 				// Sending to a channel that has not been allocated, so ignore it
-				//log.Errorf("Could not find channel %s", msg.Channel)
+				log.Errorf("Could not find channel %s", msg.Channel)
 			}
 
 		case sub := <-h.subscribe:
-			log.Infof("Subscribing to channel %s - %v", sub.clientID, sub.channel)
 			h.subscribeChannel(sub.clientID, sub.channel)
-
-			/* not broadcasting currently. This might change
-			case message := <-h.Broadcast:
-				for client := range h.clients {
-					select {
-					case client.send <- message: // echo
-					default:
-						close(client.send)
-						delete(h.clients, client)
-					}
-				}
-			*/
 		}
 	}
 }
 
-func (h *WebSocketHub) unregisterClient(clientID string) {
-	var client,_ = h.clients[clientID]
+func (h *ServerSentEventHub) unregisterClient(clientID string) {
+	log.FrameworkDebugf("UnregisterClient %s", clientID)
+
+	var client, _ = h.clients[clientID]
 
 	if client == nil {
 		return
@@ -142,27 +95,31 @@ func (h *WebSocketHub) unregisterClient(clientID string) {
 	for channel := range client.channels {
 		h.unsubscribeChannel(clientID, channel)
 	}
-	delete (h.clients, clientID)
+	delete(h.clients, clientID)
 }
 
-func (h *WebSocketHub) subscribeChannel(clientID string, channel string) {
-	var client,_ = h.clients[clientID]
+func (h *ServerSentEventHub) subscribeChannel(clientID string, channel string) {
+	log.FrameworkDebugf("Subscribe channel %s-%s", clientID, channel)
+
+	var client, _ = h.clients[clientID]
 
 	if client == nil {
 		return
 	}
 
-	client.channels[channel] = true
+	client.channels[channel] = struct{}{}
 	if clientIDs, ok := h.channels[channel]; !ok {
-		clientIDs = make(map[string]bool)
-		clientIDs[clientID] = true
+		clientIDs = make(map[string]struct{})
+		clientIDs[clientID] = struct{}{}
 		h.channels[channel] = clientIDs
 	} else {
-		clientIDs[clientID] = true
+		clientIDs[clientID] = struct{}{}
 	}
 }
 
-func (h *WebSocketHub) unsubscribeChannel(clientID string, channel string) {
+func (h *ServerSentEventHub) unsubscribeChannel(clientID string, channel string) {
+	log.FrameworkDebugf("Unsubscribe channel %s-%s", clientID, channel)
+
 	if clientIDs, ok := h.channels[channel]; ok {
 		delete(clientIDs, clientID)
 		if len(clientIDs) == 0 {
@@ -175,7 +132,3 @@ func (h *WebSocketHub) unsubscribeChannel(clientID string, channel string) {
 		delete(client.channels, channel)
 	}
 }
-
-
-
-

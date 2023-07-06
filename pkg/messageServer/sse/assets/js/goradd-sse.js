@@ -26,59 +26,66 @@ goradd.initMessagingClient = function(loc) {
             goradd._messageLoc = "http://";
         }
         port = location.port ? ":" + location.port : "";
-        goradd._messageLoc += window.location.hostname + port + loc + "?id=" + goradd.getPageState();
+        goradd._messageLoc += window.location.hostname + port + loc;
+
         if (!goradd._sse) {
-            goradd._sse = new EventSource(goradd._messageLoc);
+            goradd._sse = new EventSource(goradd._messageLoc + "?cmd=new&id=" + goradd.getPageState());
         }
         goradd._sse.addEventListener("message", goradd._handleSseMessage);
-        // we purposefully do not use goradd._sse.onmessage = ... so that we can add multiple event listeners.
         goradd._sse.onopen = function() {
             goradd.subscribeWatchers();
             g$(goradd.form()).trigger("messengerReady");
         }
+
+        window.addEventListener("beforeUnload", function() {
+            goradd._sse.close();
+        });
     }
 };
 
 // channels is an array of strings indicating the channels to subscribe to
 // f is the function to call when a message comes through on that channel
 goradd.subscribe = function(channels, f) {
-    var msg = {};
-    msg["subscribe"] = channels;
-    fetch(goradd._messageLoc, );
-    goradd._sse.send(JSON.stringify(msg));
+    goradd._sendMessage("subscribe", channels);
     goradd.each(channels, function() {
         goradd._channels[this] = f;
     });
 };
 
+goradd._sendMessage = function(cmd, data) {
+    let params = new URLSearchParams();
+    let options = {};
+
+    params.append('id', goradd.getPageState());
+    params.append('cmd', cmd);
+
+    if (data) {
+        options = {
+            method: 'POST',
+            body: JSON.stringify( data ),
+            headers: {
+                "Content-Type": "application/json",
+            },
+            cache: 'no-store',
+        };
+    }
+    fetch(goradd._messageLoc + "?" + params.toString(), options);
+}
+
 /*
-The default message handler. Will route the message to the appropriate channel.
+ *   The default message handler. Will route the message to the appropriate channel.
  */
 goradd._handleSseMessage = function(e) {
-    var messages = JSON.parse(e.data);
+    let messages = JSON.parse(e.data);
     console.log("messages: " + e.data);
 
     goradd.each(messages, function() {
-        var msg = this;
-        var f = goradd._channels[msg.channel];
+        let msg = this;
+        let f = goradd._channels[msg.channel];
         if (!!f) {
             f(msg);
         }
     });
 };
 
-/*
-Close the websocket connection.
-See https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/close for status codes
-*/
-goradd._closeWebSocket = function(status) {
-    if (goradd._ws) {
-        goradd._ws.close(); // Not all browsers support a status code, and attempting one breaks javascript.
-    }
-};
-
-goradd._handleWsClose = function(e) {
-    goradd._channels = {};
-    goradd._ws = null;
-};
 
