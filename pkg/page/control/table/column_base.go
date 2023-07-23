@@ -3,9 +3,9 @@ package table
 import (
 	"context"
 	"fmt"
+	"github.com/goradd/goradd/pkg/any"
 	"github.com/goradd/goradd/pkg/page/action"
 	"github.com/goradd/goradd/pkg/page/event"
-	"github.com/goradd/goradd/pkg/reflect"
 	time2 "github.com/goradd/goradd/pkg/time"
 	"html"
 	"io"
@@ -19,6 +19,10 @@ import (
 	"github.com/goradd/html5tag"
 )
 
+// SortDirection indicates the current direction of the sort arrows for the column.
+//   - NotSortable indicates the column cannot be sorted.
+//   - NotSorted indicates that the column CAN be sorted, but the direction is currently not determined
+//   - SortAscending and SortDescending indicate the column is currently sorted in the corresponding direction.
 type SortDirection int
 
 const (
@@ -28,9 +32,11 @@ const (
 	NotSorted      = SortDirection(-100)
 )
 
+const ColumnSortEventName = "gr-sort"
+
 // ColumnSortEvent indicates a column's sort button has been clicked.
 func ColumnSortEvent() *event.Event {
-	return event.NewEvent("gr-sort")
+	return event.NewEvent(ColumnSortEventName)
 }
 
 // SortButtonHtmlGetter is the injected function for getting the html for sort buttons in the column header.
@@ -147,7 +153,7 @@ func (c *ColumnBase) init(self ColumnI) {
 }
 
 func (c *ColumnBase) this() ColumnI {
-	return c.Self.(ColumnI)
+	return c.Self().(ColumnI)
 }
 
 // ID returns the id of the column
@@ -466,7 +472,7 @@ func (c *ColumnBase) RenderSortButton(labelHtml string) string {
 
 	return fmt.Sprintf(
 		`<button class="gr-transparent-btn" onclick="g$('%s').trigger('%s', '%s'); return false;">%s</button>`,
-		c.parentTable.ID(), ColumnSortEvent(), c.ID(), labelHtml)
+		c.parentTable.ID(), ColumnSortEventName, c.ID(), labelHtml)
 }
 
 // SortDirection returns the current sort direction.
@@ -756,23 +762,19 @@ func (c *ColumnBase) ApplyFormat(data interface{}) string {
 	case nil:
 		return ""
 	default:
-		if c.format == "" {
-			if reflect.IsSlice(d) {
-				return reflect.JoinStringers(d, ", ")
-			} else {
-				out = fmt.Sprint(d)
+		var format = c.format
+		if format == "" {
+			format = `%v`
+		}
+		if any.IsSlice(d) {
+			s := any.InterfaceSlice(d)
+			var items []string
+			for _, i := range s {
+				items = append(items, fmt.Sprintf(format, i))
 			}
+			return strings.Join(items, ", ")
 		} else {
-			if reflect.IsSlice(d) {
-				s := reflect.InterfaceSlice(d)
-				var items []string
-				for _, i := range s {
-					items = append(items, fmt.Sprintf(c.format, i))
-				}
-				return strings.Join(items, ", ")
-			} else {
-				out = fmt.Sprintf(c.format, d)
-			}
+			out = fmt.Sprintf(format, d)
 		}
 	}
 	return out

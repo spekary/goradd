@@ -23,11 +23,11 @@ func (p *{{= panelName }}) Validate(ctx context.Context) bool {
                     continue // the controls for this index are all display only, so nothing to validate
                 }
 
-                // TODO: We are not dealing with the situation where one of the control is editable, and another is not
-                // Fix this if this becomes an issue some day
+                // Note: we are not dealing with the situation where one of the controls is editable, and another is not
+                // You will need to override this method if that is an issue.
 
 {{
-    if {{join idx.Columns,","}}ctrl{{i _i+1}}{{join}} := {{join idx.Columns,","}}p.Get{{= t.ControlDescription(_j).ControlName }}(){{join}}; {{join idx.Columns, "&& "}}ctrl{{i _i+1}} != nil {{join}}{
+    if {{join idx.Columns,","}}ctrl{{i _i+1}}{{join}} := {{join idx.Columns,","}}p.{{= t.ControlDescription(_j).ControlName }}(){{join}}; {{join idx.Columns, "&& "}}ctrl{{i _i+1}} != nil {{join}}{
         {{for i,col := range idx.Columns}}
         val{{i i+1 }} := ctrl{{i i+1}}.Value().({{= col.ColumnType.GoType() }})
         {{for}}

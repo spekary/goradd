@@ -2,6 +2,7 @@ package control
 
 import (
 	"context"
+	"github.com/goradd/goradd/pkg/config"
 	"html"
 	"io"
 	"reflect"
@@ -47,15 +48,14 @@ type FormFieldWrapper struct {
 	subtag string
 }
 
-func NewFormField(parent page.ControlI, id string) *FormFieldWrapper {
+func NewFormFieldWrapper(parent page.ControlI, id string) *FormFieldWrapper {
 	p := &FormFieldWrapper{}
-	p.Self = p
-	p.Init(parent, id)
+	p.Init(p, parent, id)
 	return p
 }
 
-func (c *FormFieldWrapper) Init(parent page.ControlI, id string) {
-	c.ControlBase.Init(parent, id)
+func (c *FormFieldWrapper) Init(self any, parent page.ControlI, id string) {
+	c.ControlBase.Init(self, parent, id)
 	c.Tag = "div"
 	c.subtag = "div"
 	c.labelAttributes = html5tag.NewAttributes().
@@ -70,7 +70,7 @@ func (c *FormFieldWrapper) Init(parent page.ControlI, id string) {
 }
 
 func (c *FormFieldWrapper) this() FormFieldWrapperI {
-	return c.Self.(FormFieldWrapperI)
+	return c.Self().(FormFieldWrapperI)
 }
 
 // SetFor associates the form field with a sub control. The relatedId
@@ -312,8 +312,8 @@ type FormFieldWrapperCreator struct {
 // AddControls for the parent control you want to add this to, or add this to
 // the Children of the parent control's creator.
 func (f FormFieldWrapperCreator) Create(ctx context.Context, parent page.ControlI) page.ControlI {
-	id := MakeCreatorWrapperID(f.ID, f.Child, "ff")
-	c := NewFormField(parent, id)
+	id := MakeCreatorWrapperID(f.ID, f.Child, config.DefaultFormFieldWrapperIdSuffix)
+	c := NewFormFieldWrapper(parent, id)
 	f.Init(ctx, c)
 	if f.IsInline { // subclasses might deal with this issue differently
 		c.Tag = "span"
@@ -323,8 +323,7 @@ func (f FormFieldWrapperCreator) Create(ctx context.Context, parent page.Control
 	return c
 }
 
-// Init is called by implementations of a FormFieldWrapper to initialize
-// the creator. You do not normally need to call this.
+// Init is called by implementations of a FormFieldWrapper to initialize the creator.
 func (f FormFieldWrapperCreator) Init(ctx context.Context, c FormFieldWrapperI) {
 	c.ApplyOptions(ctx, f.ControlOptions)
 	c.SetText(f.Label)
@@ -364,15 +363,17 @@ func GetCreatorID(c page.Creator) string {
 }
 
 // MakeCreatorWrapperID is used by Creators of wrapper controls to return the computed id of a
-// parent control that wraps a control creator.
+// parent control that wraps a control creator if the wrapper does not have a defined id.
+//
 // This would be the id of the parent control, followed by the id of the child control, followed by the postfix.
-func MakeCreatorWrapperID(wrapperId string, childCreator page.Creator, postfix string) string {
+// If a value is passed to wrapperId, it is returned unchanged.
+func MakeCreatorWrapperID(wrapperId string, childCreator page.Creator, suffix string) string {
 	id := wrapperId
 	if id == "" &&
 		childCreator != nil {
 		childId := GetCreatorID(childCreator)
 		if childId != "" {
-			id = childId + "-" + postfix
+			id = childId + suffix
 		}
 	}
 	return id

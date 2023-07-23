@@ -10,9 +10,9 @@ import (
 	"context"
 	"encoding/gob"
 	"fmt"
+	reflect2 "github.com/goradd/goradd/pkg/any"
 	"github.com/goradd/goradd/pkg/goradd"
 	"github.com/goradd/goradd/pkg/i18n"
-	reflect2 "github.com/goradd/goradd/pkg/reflect"
 	"github.com/goradd/goradd/pkg/session"
 	strings2 "github.com/goradd/goradd/pkg/strings"
 	"github.com/goradd/html5tag"
@@ -150,7 +150,7 @@ func (p *Page) runPage(ctx context.Context, w http2.ResponseWriter, isNew bool) 
 	return
 }
 
-// Returns the form for the page
+// Form returns the form for the page.
 func (p *Page) Form() FormI {
 	return p.form
 }
@@ -228,7 +228,7 @@ func (p *Page) GenerateControlID(id string) string {
 	}
 }
 
-// GetControl returns the control with the given id. If not found, it panics. Use HasControl to check for existence.
+// GetControl returns the ControlI with the given id. If not found, it panics. Use HasControl to check for existence.
 func (p *Page) GetControl(id string) ControlI {
 	if id == "" {
 		panic("attempting to get a control with a blank id")
@@ -243,6 +243,27 @@ func (p *Page) GetControl(id string) ControlI {
 	}
 }
 
+// Control returns the control with the given id. Use this function to retrieve
+// controls created with control creators.
+//
+// If the control does not exist, or is not of the given type, it will return a nil object of the given type.
+// Be sure to use a pointer to a control type as the template type.
+//
+// Example:
+//
+//	myTextBox := page.Control[*control.Textbox](f.Page(), myId)
+func Control[T ControlI](p *Page, id string) T {
+	if p.HasControl(id) {
+		c := p.GetControl(id)
+		if c2, ok := c.(T); ok {
+			return c2
+		}
+	}
+	var v T
+	return v // returns a nil object
+}
+
+// HasControl returns true if the control with the given id is registered on the page.
 func (p *Page) HasControl(id string) bool {
 	if id == "" {
 		return false
@@ -270,6 +291,7 @@ func (p *Page) addControl(control ControlI) {
 	p.controlRegistry[id] = control
 
 	if control.Parent() == nil {
+		_ = control.(FormI)
 		if f, ok := control.(FormI); ok {
 			if p.form != nil {
 				panic("The Form object for the page has already been set.")
@@ -306,7 +328,7 @@ func (p *Page) Title() string {
 	return p.title
 }
 
-// Call SetTitle to set the content of the <title> tag to be output in the head of the page.
+// SetTitle sets the content of the <title> tag.
 func (p *Page) SetTitle(title string) {
 	p.title = title
 }

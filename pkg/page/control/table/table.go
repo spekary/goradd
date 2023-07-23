@@ -136,28 +136,27 @@ type Table struct {
 // NewTable creates a new table
 func NewTable(parent page.ControlI, id string) *Table {
 	t := &Table{}
-	t.Self = t
-	t.Init(parent, id)
+	t.Init(t, parent, id)
 	return t
 }
 
 // Init is an internal function that enables the object-oriented pattern of calling virtual functions used by the
 // GoRADD controls. You would only call this if you were implementing a "subclass" of the Table. Call it immediately after
 // creating your Table structure, passing the newly created table as "self".
-func (t *Table) Init(parent page.ControlI, id string) {
-	t.ControlBase.Init(parent, id)
+func (t *Table) Init(self any, parent page.ControlI, id string) {
+	t.ControlBase.Init(self, parent, id)
 	t.Tag = "table"
 	t.columns = []ColumnI{}
 	t.sortHistoryLimit = 1
 	t.sortableHtml = "&udarr;"
-	t.sortAscHtml = "&darr;"
-	t.sortDescHtml = "&uarr;"
+	t.sortAscHtml = "&uarr;"
+	t.sortDescHtml = "&darr;"
 }
 
 // this returns the TableI interface for calling into "virtual" functions. This allows us to call functions defined
 // by a subclass.
 func (t *Table) this() TableI {
-	return t.Self.(TableI)
+	return t.Self().(TableI)
 }
 
 // SetHideIfEmpty will tell the table to not draw at all if there is no data in the table, vs. drawing
@@ -921,7 +920,6 @@ func (c TableCreator) Create(ctx context.Context, parent page.ControlI) page.Con
 }
 
 // Init is called by implementations of Tables to initialize a base control.
-// You do not normally need to call this.
 func (c TableCreator) Init(ctx context.Context, ctrl TableI) {
 	ctrl.SetHideIfEmpty(c.HideIfEmpty)
 	if c.Caption != nil {
@@ -966,12 +964,14 @@ func (c TableCreator) Init(ctx context.Context, ctrl TableI) {
 	if c.Data != nil {
 		ctrl.SetData(c.Data)
 	}
+	var sortable bool
 	if c.Columns != nil {
 		for _, colCreator := range c.Columns {
-			ctrl.AddColumn(colCreator.Create(ctx, ctrl))
+			col := ctrl.AddColumn(colCreator.Create(ctx, ctrl))
+			sortable = sortable || col.IsSortable()
 		}
 	}
-	if c.Sortable {
+	if sortable || c.Sortable {
 		ctrl.MakeSortable()
 	}
 	if c.SortHistoryLimit > 0 {

@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/goradd/goradd/pkg/page/control/table"
 
-	"github.com/goradd/goradd/pkg/iface"
+	"github.com/goradd/goradd/pkg/any"
 	"github.com/goradd/goradd/pkg/orm/query"
 	"github.com/goradd/goradd/pkg/page"
 )
@@ -64,7 +64,7 @@ func (c *NodeColumn) CellData(_ context.Context, _ int, _ int, data interface{})
 		v2 := v
 		for i = len(names) - 2; i > 0; i-- {
 			obj := v2.Get(names[i])
-			if iface.IsNil(obj) {
+			if any.IsNil(obj) {
 				return nil // Either an object was not joined, or the joined object does not exist in the database.
 			}
 			v2, ok = obj.(Getter)
@@ -135,7 +135,12 @@ type NodeColumnCreator struct {
 	// Title is the title of the column that will appear in the header
 	Title string
 	// Sortable makes the column display sort arrows in the header
+	// Deprecated: Use SortDirection instead
 	Sortable bool
+	// SortDirection sets the initial sorting direction of the column, and will make the column sortable
+	// By default, the column is not sortable.
+	SortDirection table.SortDirection
+	// IsHtml indicates that the texter is producing HTML rather than text that should be escaped.
 	table.ColumnOptions
 }
 
@@ -147,6 +152,9 @@ func (c NodeColumnCreator) Create(ctx context.Context, parent table.TableI) tabl
 	col.SetTitle(c.Title)
 	if c.Sortable {
 		col.SetSortable()
+	}
+	if c.SortDirection != table.NotSortable {
+		col.SetSortDirection(c.SortDirection)
 	}
 	col.ApplyOptions(ctx, parent, c.ColumnOptions)
 	return col

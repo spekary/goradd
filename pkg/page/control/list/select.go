@@ -37,20 +37,19 @@ type SelectList struct {
 // NewSelectList creates a new select list
 func NewSelectList(parent page.ControlI, id string) *SelectList {
 	t := &SelectList{}
-	t.Self = t
-	t.Init(parent, id)
+	t.Init(t, parent, id)
 	return t
 }
 
 // Init is called by subclasses.
-func (l *SelectList) Init(parent page.ControlI, id string) {
-	l.ControlBase.Init(parent, id)
+func (l *SelectList) Init(self any, parent page.ControlI, id string) {
+	l.ControlBase.Init(self, parent, id)
 	l.List = NewList(l.this())
 	l.Tag = "select"
 }
 
 func (l *SelectList) this() SelectListI {
-	return l.Self.(SelectListI)
+	return l.Self().(SelectListI)
 }
 
 // Validate is called by the framework to validate the contents of the control. For a SelectList,
@@ -260,7 +259,8 @@ type SelectListCreator struct {
 	// Items is a static list of labels and values that will be in the list. Or, use a DataProvider to dynamically generate the items.
 	Items []ListValue
 	// NilItem is a helper to add an item at the top of the list with a nil value. This is often
-	// used to specify no selection, or a message that a selection is required.
+	// used to specify no selection, or a message that a selection is required. This only works
+	// if you are NOT using a DataProvider
 	NilItem string
 	// DataProvider is the control that will dynamically provide the data for the list and that implements the DataBinder interface.
 	DataProvider control2.DataBinder

@@ -2,6 +2,7 @@ package control
 
 import (
 	"context"
+	"github.com/goradd/goradd/pkg/config"
 	"html"
 	"io"
 	"strings"
@@ -30,19 +31,18 @@ type FormGroup struct {
 
 func NewFormGroup(parent page.ControlI, id string) *FormGroup {
 	p := &FormGroup{}
-	p.Self = p
-	p.Init(parent, id)
+	p.Init(p, parent, id)
 	return p
 }
 
-func (c *FormGroup) Init(parent page.ControlI, id string) {
-	c.FormFieldWrapper.Init(parent, id)
+func (c *FormGroup) Init(self any, parent page.ControlI, id string) {
+	c.FormFieldWrapper.Init(self, parent, id)
 	c.innerDivAttr = html5tag.NewAttributes()
 	c.InstructionAttributes().AddClass("form-text")
 }
 
 func (c *FormGroup) this() FormGroupI {
-	return c.Self.(FormGroupI)
+	return c.Self().(FormGroupI)
 }
 
 func (c *FormGroup) Validate(ctx context.Context) bool {
@@ -216,7 +216,7 @@ func (c *FormGroup) Deserialize(dec page.Decoder) {
 // are wrapping as the Child item.
 type FormGroupCreator struct {
 	// ID is the optional control id on the html form. If you do not specify this, it
-	// will create on for you that is the ID of the child control + "-fg"
+	// will create on for you that is the ID of the child control + "-ff"
 	ID string
 	// Label is the text that will be in the html label tag associated with the Child control.
 	Label string
@@ -250,14 +250,14 @@ type FormGroupCreator struct {
 // Create is called by the framework to create the control. You do not
 // normally need to call it.
 func (f FormGroupCreator) Create(ctx context.Context, parent page.ControlI) page.ControlI {
-	id := control.MakeCreatorWrapperID(f.ID, f.Child, "fg")
+	id := control.MakeCreatorWrapperID(f.ID, f.Child, config.DefaultFormFieldWrapperIdSuffix)
 	c := NewFormGroup(parent, id)
 	f.Init(ctx, c)
 	return c
 }
 
 // Init is called by implementations of a FormFieldWrapper to initialize
-// the creator. You do not normally need to call this.
+// the creator.
 func (f FormGroupCreator) Init(ctx context.Context, c FormGroupI) {
 	// Reuse parent creator
 	ff := control.FormFieldWrapperCreator{

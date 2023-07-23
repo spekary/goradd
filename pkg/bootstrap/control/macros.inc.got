@@ -51,6 +51,7 @@
 {{# setInnerDivAttributes sets the InnerDiv attributes on FormGroups. }}
 {{# This creates a div wrapper around the control that the FormGroup is managing. }}
 {{# This is of the form name="value" }}
+{{# You should import the bootstrap controls as a "." import to use this. }}
 
 {{define setInnerDivAttributes 2}}
 {{g

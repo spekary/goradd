@@ -27,22 +27,23 @@ type Forms1Panel struct {
 }
 
 func NewForms1Panel(ctx context.Context, parent page.ControlI) {
-	p := &Forms1Panel{}
-	p.Self = p
-	p.Init(ctx, parent, "textboxPanel")
+	p := new(Forms1Panel)
+	p.Init(p, ctx, parent, "textboxPanel")
 
 }
 
-func (p *Forms1Panel) Init(ctx context.Context, parent page.ControlI, id string) {
-	p.Panel.Init(parent, id)
+func (p *Forms1Panel) Init(self any, ctx context.Context, parent page.ControlI, id string) {
+	p.Panel.Init(self, parent, id)
 	p.Panel.AddControls(ctx,
 		FormGroupCreator{
+			ID:    "nameText-ff",
 			Label: "Name",
 			Child: TextboxCreator{
 				ID: "nameText",
 			},
 		},
 		FormGroupCreator{
+			ID:           "childrenText-ff",
 			Label:        "Child Count",
 			Instructions: "How many children do you have?",
 			Child: IntegerTextboxCreator{
@@ -67,6 +68,7 @@ func (p *Forms1Panel) Init(ctx context.Context, parent page.ControlI, id string)
 			ID: "radioResult",
 		},
 		FormGroupCreator{
+			ID:           "dogCheck-ff",
 			Label:        "Dog",
 			Instructions: "Do you have a dog?",
 			Child: CheckboxCreator{
