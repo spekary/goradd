@@ -35,9 +35,6 @@ var SelectOneString = "- Select One -"
 
 // NoSelectionString is used in selection lists as the item that indicates no selection when a selection is not required
 var NoSelectionString = "-"
-<<<<<<< HEAD
-=======
 
 // DefaultFormFieldWrapperIdSuffix is the default suffix added to form control wrapper ids
 var DefaultFormFieldWrapperIdSuffix = "-ff"
->>>>>>> main-goradd
