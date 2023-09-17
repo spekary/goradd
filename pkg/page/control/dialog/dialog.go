@@ -106,7 +106,7 @@ func (d *Dialog) Init(self any, parent page.ControlI, id string) {
 	bb := control.NewPanel(d, d.buttonBarID)
 	bb.AddClass("gr-dialog-buttons")
 	d.SetValidationType(event.ValidateChildrenOnly) // allows sub items to validate and have validation stop here
-	d.On(event.DialogClosed().Validate(event.ValidateNone).Private(), action.Ajax(d.ID(), ClosedAction))
+	d.On(event.DialogClosed().Validate(event.ValidateNone).Private(), action.Do(d.ID(), ClosedAction))
 }
 
 func (d *Dialog) TitleBar() *control.Panel {
@@ -389,6 +389,19 @@ func SetNewDialogFunction(f DialogIFuncType) {
 // code, or in situations where you have multiple styles of dialog to demonstrate.
 func RestoreNewDialogFunction() {
 	newDialogFunc = defaultNewDialogFunc
+}
+
+// GetDialog returns the DialogI object corresponding to the given id. The id should be either the id of the
+// dialog object, or the DialogPanel inside the dialog object.
+func GetDialog(parent page.ControlI, id string) DialogI {
+	c := parent.Page().GetControl(id)
+
+	if dlg, ok := c.(DialogI); ok {
+		return dlg
+	} else if dlg, ok := c.(*DialogPanel); ok {
+		return dlg.Parent().(DialogI)
+	}
+	return nil
 }
 
 func init() {
