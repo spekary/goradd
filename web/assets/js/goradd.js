@@ -2676,8 +2676,8 @@ var g$ = function(el) {
             };
 
             objRequest.onerror = function (event) {
-                goradd.log("upload error");
-                opts.error("A file upload error occurred");
+                goradd.log("ajax error");
+                opts.error("The server is not responding.");
             };
 
             objRequest.ontimeout  = function (event) {

@@ -420,6 +420,7 @@ func (form *TestForm) testAllAndExit(ctx context.Context) {
 			}()
 
 			<-done
+			log.FrameworkDebugf("Test complete: %s", testName)
 			return true
 		})
 		close(done)

@@ -65,5 +65,7 @@ func useFlags() {
 	if *tlsCertFile != "" {
 		config2.TLSCertFile = *tlsCertFile
 	}
-	log.SetLoggingLevel(*logLevel)
+	if *logLevel != 0 {
+		log.SetLoggingLevel(*logLevel)
+	}
 }

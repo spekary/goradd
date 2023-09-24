@@ -1,4 +1,5 @@
-// Package messageServer implements a one-way messaging service that sends messages to the http client.
+// Package messageServer implements a messaging service that sends messages to the http client.
+//
 // There are many mechanisms for doing this, and new ones are evolving constantly.
 // Goradd uses this service to communicate to the client that data has changed and it should initiate a
 // data refresh. However, it is general purpose enough that the application or specific controls could make

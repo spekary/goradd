@@ -44,7 +44,7 @@ type FileSelectI interface {
 
 // FileSelect is a standard html file select button.
 //
-// By default, it will only accept single file. Call SetMultiple to allow multiple selections, and SetAccept
+// By default, it will only accept a single file. Call SetMultiple to allow multiple selections, and SetAccept
 // to control what types of files can be selected based on the file suffixes.
 //
 // To get the list of files that have been selected, call FileInfo.
@@ -59,7 +59,8 @@ type FileSelectI interface {
 // If you would like to trigger an UploadEvent as soon as files are selected, call SetUploadOnChange.
 //
 // If your application is running behind a web server like apache or nginx, you probably will
-// need to set the maximum upload file size in that software.
+// need to set the maximum upload file size in that software. Also set config.MaxBytes to the maximum file size you
+// expect.
 type FileSelect struct {
 	page.ControlBase
 	// path taken from the form value. Note that sometimes this has a fake path plus a file name, so likely just the last item is valuable.

@@ -67,7 +67,10 @@ func (bw *bufferedResponseWriter) WriteHeader(code int) {
 		bw.ResponseWriter.WriteHeader(code)
 		return
 	}
-	bw.code = code
+	if bw.code != -1 {
+		// -1 indicates that the headers and error code have already been sent so se can't send them again.
+		bw.code = code
+	}
 }
 
 // WriteString satisfies the StringWriter interface for WriteString optimization.
@@ -99,6 +102,24 @@ func (bw *bufferedResponseWriter) Len() int {
 	} else {
 		return bw.buf.Len()
 	}
+}
+
+// Unwrap returns the original response writer, and is used in Go 1.20 and later
+// by the ResponseController.
+func (bw *bufferedResponseWriter) Unwrap() http.ResponseWriter {
+	return bw.ResponseWriter
+}
+
+// Flush sends the buffered output to the output stream.
+func (bw *bufferedResponseWriter) Flush() {
+	if bw.code != -1 && bw.code != 0 && bw.code != 200 {
+		bw.Unwrap().WriteHeader(bw.code)
+	}
+	_, e := bw.Unwrap().Write(bw.buf.Bytes())
+	if e != nil {
+		grlog.Error("Buffered write error ", e.Error())
+	}
+	bw.code = -1 // record that headers and the error code have already been sent
 }
 
 // DisableOutputBuffering turns off output buffering.
@@ -152,13 +173,7 @@ func (bw *defaultBufferedOutputManager) Use(next http.Handler) http.Handler {
 		r = r.WithContext(ctx)
 		defer pool.PutBuffer(outBuf)
 		next.ServeHTTP(bwriter, r)
-		if bwriter.code != 0 && bwriter.code != 200 {
-			w.WriteHeader(bwriter.code)
-		}
-		_, e := w.Write(outBuf.Bytes())
-		if e != nil {
-			grlog.Error("Buffered write error ", e.Error())
-		}
+		bwriter.Flush()
 	}
 	return http.HandlerFunc(fn)
 }

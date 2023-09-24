@@ -44,21 +44,11 @@ func (m *SseMessenger) Send(channel string, message string) {
 // the request, authorize the client, then insert the client ID into the context of the
 // Request
 func (m *SseMessenger) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseForm(); err != nil {
-		return
-	}
 	clientID := r.FormValue("id")
 	cmd := r.FormValue("cmd")
 
 	switch cmd {
 	case "new":
-		_, ok := w.(http.Flusher)
-
-		if !ok {
-			http.Error(w, "Streaming unsupported!", http.StatusInternalServerError)
-			return
-		}
-
 		newClient(m.hub, w, r, clientID)
 
 	case "subscribe":
@@ -77,6 +67,8 @@ func (m *SseMessenger) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			}
 			m.hub.subscribe <- s
 		}
-	}
+	default:
+		return // error in parameters
 
+	}
 }

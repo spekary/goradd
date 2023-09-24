@@ -153,6 +153,7 @@ func PutContext(r *http.Request, cliArgs []string) *http.Request {
 }
 
 func (ctx *Context) fillHttp(r *http.Request) (err error) {
+
 	if contentType := r.Header.Get("content-type"); contentType != "" {
 		// Per comments in the ResponseWriter, we need to read and process the entire request before attempting to write.
 		if strings.Contains(contentType, "multipart") {

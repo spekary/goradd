@@ -4,6 +4,8 @@ import (
 	"context"
 	"github.com/goradd/goradd/pkg/config"
 	"github.com/goradd/goradd/pkg/sys"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 	"log"
 	"net/http"
 )
@@ -28,6 +30,7 @@ func ListenAndServeTLSWithTimeouts(addr, certFile, keyFile string, handler http.
 	// TODO: https://blog.gopheracademy.com/advent-2016/exposing-go-on-the-internet/ recommends keeping track
 	// of open connections using the ConnState hook for debugging purposes.
 
+	// encrypted connections should support http2 out of the box.
 	server = &http.Server{
 		Addr:              addr,
 		ReadTimeout:       config.ReadTimeout,
@@ -49,13 +52,16 @@ func ListenAndServeWithTimeouts(addr string, handler http.Handler) error {
 	// TODO: https://blog.gopheracademy.com/advent-2016/exposing-go-on-the-internet/ recommends keeping track
 	// of open connections using the ConnState hook for debugging purposes.
 
+	// Support http2 unencrypted
+	h2s := &http2.Server{}
+
 	server = &http.Server{
 		Addr:              addr,
 		ReadTimeout:       config.ReadTimeout,
 		ReadHeaderTimeout: config.ReadHeaderTimeout,
 		WriteTimeout:      config.WriteTimeout,
 		IdleTimeout:       config.IdleTimeout,
-		Handler:           handler,
+		Handler:           h2c.NewHandler(handler, h2s),
 	}
 	return server.ListenAndServe()
 }

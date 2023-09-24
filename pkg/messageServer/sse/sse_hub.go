@@ -6,6 +6,7 @@ package sse
 
 import (
 	"github.com/goradd/goradd/pkg/log"
+	"time"
 )
 
 type clientMessage struct {
@@ -17,6 +18,14 @@ type subscription struct {
 	clientID string
 	channel  string
 }
+
+// KeepAliveInterval is the interval that the server will ping the client to keep it from closing the connection.
+var KeepAliveInterval = time.Duration(10 * time.Minute)
+
+// WriteTimeout is the total time that the connection can be kept open. Browsers will need to refresh their pages
+// to re-establish the connection after this time. This should be kept as small as possible to prevent running out
+// of resources.
+var WriteTimeout = time.Duration(24 * time.Hour)
 
 type ServerSentEventHub struct {
 	// Channels that clients have subscribed to. Each channel points to a map of client IDs
@@ -51,7 +60,7 @@ func (h *ServerSentEventHub) run() {
 	for {
 		select {
 		case client := <-h.register:
-			log.FrameworkDebugf("New client registering - client ID: %s", client.clientID)
+			log.Infof("SSE client registering - client ID: %s", client.clientID)
 
 			if _, ok := h.clients[client.clientID]; ok {
 				// The same client is registering again. Unregister first.
@@ -60,7 +69,7 @@ func (h *ServerSentEventHub) run() {
 			h.clients[client.clientID] = client
 
 		case clientID := <-h.unregister:
-			log.Infof("client unregistering clientID: %s", clientID)
+			log.Infof("SSE client unregistering - clientID: %s", clientID)
 			h.unregisterClient(clientID)
 
 		case msg := <-h.send:
@@ -69,6 +78,7 @@ func (h *ServerSentEventHub) run() {
 
 				for clientID := range clientIDs {
 					if client, ok2 := h.clients[clientID]; ok2 {
+						log.FrameworkDebugf("Sending to client: %s", client.clientID)
 						client.send <- msg
 					}
 				}
@@ -99,7 +109,7 @@ func (h *ServerSentEventHub) unregisterClient(clientID string) {
 }
 
 func (h *ServerSentEventHub) subscribeChannel(clientID string, channel string) {
-	log.FrameworkDebugf("Subscribe channel %s-%s", clientID, channel)
+	log.FrameworkDebugf("Subscribe client: %s channel: %s", clientID, channel)
 
 	var client, _ = h.clients[clientID]
 
@@ -118,7 +128,7 @@ func (h *ServerSentEventHub) subscribeChannel(clientID string, channel string) {
 }
 
 func (h *ServerSentEventHub) unsubscribeChannel(clientID string, channel string) {
-	log.FrameworkDebugf("Unsubscribe channel %s-%s", clientID, channel)
+	log.FrameworkDebugf("Unsubscribe client: %s channel: %s", clientID, channel)
 
 	if clientIDs, ok := h.channels[channel]; ok {
 		delete(clientIDs, clientID)

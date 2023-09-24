@@ -14,4 +14,7 @@ func initLogs() {
 	} else {
 		grlog.CreateDefaultLoggers()
 	}
+	if config.Debug {
+		grlog.SetLoggingLevel(grlog.DebugLog)
+	}
 }

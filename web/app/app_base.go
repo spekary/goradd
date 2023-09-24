@@ -17,6 +17,7 @@ import (
 	"github.com/goradd/goradd/pkg/watcher"
 	"github.com/goradd/html5tag"
 	"net/http/pprof"
+	"strings"
 	"time"
 
 	"github.com/goradd/goradd/pkg/page"
@@ -188,6 +189,7 @@ func (a *Application) MakeAppServer() http.Handler {
 	h = a.httpErrorReporter.Use(h)      // Default http error handler to intercept panics.
 	h = a.this().HSTSHandler(h)
 	h = a.this().AccessLogHandler(h)
+	h = http.MaxBytesHandler(h, config.MaxBytes)
 
 	return h
 }
@@ -322,6 +324,7 @@ func (a *Application) ServeMessenger(next http.Handler) http.Handler {
 
 		if !page.HasPage(pagestate) {
 			// The page manager has no record of the pagestate, so either it is expired or never existed
+			grlog.FrameworkInfof("Page state %s is missing.", pagestate)
 			w.WriteHeader(http.StatusNoContent) // Tells the event source to stop reconnecting and shut down
 			return
 		}
@@ -332,7 +335,12 @@ func (a *Application) ServeMessenger(next http.Handler) http.Handler {
 // AccessLogHandler simply logs requests.
 func (a *Application) AccessLogHandler(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		grlog.FrameworkInfo("Serving: ", r.RequestURI)
+		if h := r.Header.Get("X-Requested-With"); strings.ToLower(h) == "xmlhttprequest" {
+			grlog.FrameworkInfo("Ajax: ", r.RequestURI)
+		} else {
+			grlog.FrameworkInfo(r.Method, ":", r.RequestURI)
+		}
+
 		next.ServeHTTP(w, r)
 	}
 	return http.HandlerFunc(fn)

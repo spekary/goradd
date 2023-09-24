@@ -30,16 +30,23 @@ goradd.initMessagingClient = function(loc) {
 
         if (!goradd._sse) {
             goradd._sse = new EventSource(goradd._messageLoc + "?cmd=new&id=" + goradd.getPageState());
-        }
-        goradd._sse.addEventListener("message", goradd._handleSseMessage);
-        goradd._sse.onopen = function() {
-            goradd.subscribeWatchers();
-            g$(goradd.form()).trigger("messengerReady");
+
+            goradd._sse.onopen = function() {
+                console.log('SSE Open');
+                goradd.subscribeWatchers();
+                g$(goradd.form()).trigger("messengerReady");
+            }
+            goradd._sse.onerror= function(err) {
+                console.error("EventSource failed:", err);
+            }
+            goradd._sse.onmessage = function(e) {
+                goradd._handleSseMessage(e);
+            }
         }
 
-        window.addEventListener("beforeUnload", function() {
+        window.onbeforeunload = function(e) {
             goradd._sse.close();
-        });
+        }
     }
 };
 
@@ -76,8 +83,8 @@ goradd._sendMessage = function(cmd, data) {
  *   The default message handler. Will route the message to the appropriate channel.
  */
 goradd._handleSseMessage = function(e) {
-    let messages = JSON.parse(e.data);
     console.log("messages: " + e.data);
+    let messages = JSON.parse(e.data);
 
     goradd.each(messages, function() {
         let msg = this;

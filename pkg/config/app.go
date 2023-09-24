@@ -32,6 +32,13 @@ var IdleTimeout = 180 * time.Second
 // mode so that you don't have to worry about timeouts when debugging ajax code.
 var AjaxTimeout = 10000
 
+// MaxBytes is the maximum number of bytes of any request.
+// This is here to limit potentially bad actors from consuming all the memory.
+// However, if you are doing file uploads, you will either need to increase this value,
+// or use a library that chunks this into pieces this small.
+// The default is 1MB.
+var MaxBytes = 1000000
+
 // CacheBusterPrefix is a fragment that is included with cache busted paths.
 var CacheBusterPrefix = "gr."
 

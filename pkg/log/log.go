@@ -19,8 +19,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-
-	"github.com/goradd/goradd/pkg/config"
 )
 
 // The log constants represent both a separate logger, and a log level.
@@ -46,6 +44,11 @@ var loggers = make(map[int]LoggerI)
 // to be set at startup time and not while the application is running.
 func SetLoggingLevel(l int) {
 	loggingLevel = l
+}
+
+// LoggingLevel returns the current logging level.
+func LoggingLevel() int {
+	return loggingLevel
 }
 
 // LoggerI is the interface for all loggers.
@@ -156,17 +159,13 @@ func Errorf(format string, v ...interface{}) {
 
 // Debug is for application debugging logging. It becomes a no-op in the release build.
 func Debug(v ...interface{}) {
-	if config.Debug {
-		_print(DebugLog, v...)
-	}
+	_print(DebugLog, v...)
 }
 
 // Debugf prints formatted information to the application Debug logger.
 // It becomes a no-op in the release build.
 func Debugf(format string, v ...interface{}) {
-	if config.Debug {
-		_printf(DebugLog, format, v...)
-	}
+	_printf(DebugLog, format, v...)
 }
 
 // Print prints information to the given logger.
