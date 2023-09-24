@@ -37,7 +37,7 @@ var AjaxTimeout = 10000
 // However, if you are doing file uploads, you will either need to increase this value,
 // or use a library that chunks this into pieces this small.
 // The default is 1MB.
-var MaxBytes = 1000000
+var MaxBytes int64 = 1000000
 
 // CacheBusterPrefix is a fragment that is included with cache busted paths.
 var CacheBusterPrefix = "gr."

@@ -6,6 +6,7 @@ package sse
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	log2 "github.com/goradd/goradd/pkg/log"
 	"net/http"
@@ -17,8 +18,8 @@ type client struct {
 	hub *ServerSentEventHub
 
 	// The server sent event connection
-	w http.ResponseWriter
-	r *http.Request
+	w   http.ResponseWriter
+	ctx context.Context
 
 	// Buffered channel of outbound messages.
 	send chan clientMessage
@@ -38,7 +39,7 @@ func newClient(hub *ServerSentEventHub, w http.ResponseWriter, r *http.Request, 
 		clientID: clientID,
 		send:     make(chan clientMessage, 16),
 		channels: make(map[string]struct{}),
-		r:        r,
+		ctx:      r.Context(),
 	}
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -81,7 +82,7 @@ func (c *client) writePump() {
 
 	for {
 		select {
-		case <-c.r.Context().Done():
+		case <-c.ctx.Done():
 			return
 
 		case message, ok := <-c.send:
