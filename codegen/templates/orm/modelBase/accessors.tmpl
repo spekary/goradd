@@ -59,7 +59,7 @@ func (o *{{privateName}}Base) {{= col.GoName }}_I() interface{} {
 }
 
 }}
-	}
+	} // col.IsNullable
 
 	if col.IsReference() {
 		oName := oRef(col)
@@ -87,60 +87,95 @@ func (o *{{privateName}}Base) Load{{= col.ForeignKey.GoName }}(ctx context.Conte
 
 }}
 
-	}
+	} // col.IsReference
 
 // Setters
-	if col.IsId {
-		continue	// ID columns are not setable, since the database will automatically set the valid
-	}
+    if col.IsId { // ID columns are not setable, since the database will automatically set the value
+        continue
+    }
 
-	// If the column is nullable, we use an interface to allow a null to be passed in
+    // If the column is nullable, we create a function to explicitly set a null value
 	if col.IsNullable {
-		var oName string
-		if col.IsReference() {
-			oName = oRef(col)
-		}
 {{
+    func (o *{{privateName}}Base) Set{{= col.GoName }}ToNull() {
+    	o.{{= col.ModelName() }}IsValid = true
+        if !o.{{= col.ModelName() }}IsNull { // only change state if it is not currently null
+            o.{{= col.ModelName() }}IsNull = true
+            o.{{= col.ModelName() }}IsDirty = true
+            o.{{= col.ModelName() }} = {{= col.DefaultValueAsValue() }}
+{{if col.IsReference() }}
+            o.{{= oRef(col) }} = nil
+{{if}}
+    	}
+    }
+}}
+    } // col.IsNullable
 
-func (o *{{privateName}}Base) Set{{= col.GoName }}(i interface{}) {
+{{
+// Set{{= col.GoName }} sets the value of {{= col.GoName }} in the object, to be written to the database later using the Save() function.
+{{if col.ColumnType == query.ColTypeBytes}}
+// Note that a reference to the given byte array will be used, which means if you change the passed array before calling Save(), the changes will be saved.
+// To prevent this, pass a copy of the byte array.
+{{if}}
+func (o *{{privateName}}Base) Set{{= col.GoName }}(v {{= col.ColumnType.GoType() }}) {
 	o.{{= col.ModelName() }}IsValid = true
-	if i == nil {
-		if !o.{{= col.ModelName() }}IsNull {
-			o.{{= col.ModelName() }}IsNull = true
-			o.{{= col.ModelName() }}IsDirty = true
-			o.{{= col.ModelName() }} = {{= col.DefaultValueAsValue() }}
-{{if col.IsReference() }}
-			o.{{oName}} = nil
-{{if}}
-		}
-	} else {
-		v := i.({{= col.ColumnType.GoType() }})
-		if o.{{= col.ModelName() }}IsNull ||
-		    !o._restored ||
-		    {{if col.ColumnType != query.ColTypeBytes }} o.{{= col.ModelName() }} != v {{else}} !bytes.Equal(o.{{= col.ModelName() }}, v) {{if}}{
+{{if col.ColumnType == query.ColTypeBytes}}
+	o.{{= col.ModelName() }} = v
+	o.{{= col.ModelName() }}IsDirty = true
+{{if col.IsNullable}}
+    if v == nil {
+        if !o.{{= col.ModelName() }}IsNull {
+            o.{{= col.ModelName() }}IsNull = true
+            o.{{= col.ModelName() }}IsDirty = true
+	        o.{{= col.ModelName() }} = nil
+	    }
+    } else {
+        if o.{{= col.ModelName() }}IsNull ||
+                !o._restored ||
+                !bytes.Equal(o.{{= col.ModelName() }}, v) {
 
-			o.{{= col.ModelName() }}IsNull = false
-{{if col.ColumnType != query.ColTypeBytes }}
-			o.{{= col.ModelName() }} = v
-{{else}}
-            o.{{= col.ModelName() }} = append([]byte(nil), v...)
+            o.{{= col.ModelName() }} = v
+            o.{{= col.ModelName() }}IsDirty = true
+            o.{{= col.ModelName() }}IsNull = false
+        }
+    }
+{{else}} {{# col.IsNullable}}
+    if !o._restored ||
+            !bytes.Equal(o.{{= col.ModelName() }}, v) {
+        o.{{= col.ModelName() }} = v
+        o.{{= col.ModelName() }}IsDirty = true
+    }
+{{if}} {{# col.IsNullable}}
+
+
+{{else}} {{# col.ColumnType == query.ColTypeBytes}}
+	if o.{{= col.ModelName() }} != v ||
+{{if col.IsNullable}}
+            o.{{= col.ModelName() }}IsNull ||
 {{if}}
-			o.{{= col.ModelName() }}IsDirty = true
-{{if col.IsReference() }}
-			o.{{oName}} = nil
+	        !o._restored {
+		o.{{= col.ModelName() }} = v
+		o.{{= col.ModelName() }}IsDirty = true
+{{if col.IsNullable}}
+        o.{{= col.ModelName() }}IsNull = false
 {{if}}
-		}
+{{if col.IsReference()}}
+		o.{{= oRef(col) }} = nil
+{{if}}
 	}
+{{if}} {{# col.ColumnType == query.ColTypeBytes}}
+
+
 }
 
 }}
 
-		if col.IsReference() {
-			oName := oRef(col)
-
+    if col.IsReference() {
+        oName := oRef(col)
 {{
-
+// Set{{= col.ForeignKey.GoName }} sets the value of {{= col.ForeignKey.GoName }} in the object, to be saved later using the Save() function.
 func (o *{{privateName}}Base) Set{{= col.ForeignKey.GoName }}(v *{{= col.ForeignKey.GoType }}) {
+{{if col.IsNullable}}
 	o.{{= col.ModelName() }}IsValid = true
 	if v == nil {
 		if !o.{{= col.ModelName() }}IsNull || !o._restored {
@@ -157,42 +192,7 @@ func (o *{{privateName}}Base) Set{{= col.ForeignKey.GoName }}(v *{{= col.Foreign
 			o.{{= col.ModelName() }}IsDirty = true
 		}
 	}
-}
-
-}}
-
-		}
-
-	} else {	// Not nullable
-
-{{
-// Set{{= col.GoName }} sets the value of {{= col.GoName }} in the object, to be saved later using the Save() function.
-func (o *{{privateName}}Base) Set{{= col.GoName }}(v {{= col.ColumnType.GoType() }}) {
-	o.{{= col.ModelName() }}IsValid = true
-{{g if col.ColumnType == query.ColTypeBytes { }}
-	o.{{= col.ModelName() }} = v		// TODO: Copy bytes??
-	o.{{= col.ModelName() }}IsDirty = true
-{{g } else { }}
-	if o.{{= col.ModelName() }} != v || !o._restored {
-		o.{{= col.ModelName() }} = v
-		o.{{= col.ModelName() }}IsDirty = true
-{{if col.IsReference()}}
-		o.{{= oRef(col) }} = nil
-{{if}}
-	}
-{{g } }}
-
-
-}
-
-}}
-
-		if col.IsReference() {
-			oName := oRef(col)
-
-{{
-// Set{{= col.ForeignKey.GoName }} sets the value of {{= col.ForeignKey.GoName }} in the object, to be saved later using the Save() function.
-func (o *{{privateName}}Base) Set{{= col.ForeignKey.GoName }}(v *{{= col.ForeignKey.GoType }})  {
+{{else}}
 	if v == nil {
 		panic("Cannot set {{= col.ForeignKey.GoName }} to a null value.")
 	} else {
@@ -203,19 +203,18 @@ func (o *{{privateName}}Base) Set{{= col.ForeignKey.GoName }}(v *{{= col.Foreign
 			o.{{= col.ModelName() }}IsDirty = true
 		}
 	}
+{{if}}
 }
 
 }}
 
-		}
+    } // col.IsReference()
 
-	} // else
-
-}
+} // for
 
 {{
 
-// GetAlias returns the alias for the given key.
+// GetAlias returns the alias for the given key, provided the key was used in an aliased query.
 func (o *{{privateName}}Base) GetAlias(key string) query.AliasValue {
 	if a,ok := o._aliases[key]; ok {
 		return query.NewAliasValue(a)

@@ -55,7 +55,7 @@ func (o *{{privateName}}Base) update(ctx context.Context) {
                         Where(Equal(node.{{= ref.AssociatedTable.GoName}}().{{= ref.AssociatedColumn.GoName}}(), o.PrimaryKey())).
                         Get()
                 if obj != nil  && obj.PrimaryKey() != o.{{= oRef(ref) }}.PrimaryKey() {
-                   obj.Set{{= ref.AssociatedColumn.GoName}}(nil)
+                   obj.Set{{= ref.AssociatedColumn.GoName}}ToNull()
                    obj.Save(ctx)
                 }
                 if o.{{= oRef(ref) }}PK != nil {
@@ -90,7 +90,7 @@ func (o *{{privateName}}Base) update(ctx context.Context) {
                 for _,obj := range objs {
                     if _,ok := o.{{= mapPrefix }}{{= ref.GoPlural }}[obj.PrimaryKey()]; !ok {
                         // The old object is not in the group of new objects
-                        obj.Set{{= ref.AssociatedColumn.GoName}}(nil)
+                        obj.Set{{= ref.AssociatedColumn.GoName}}ToNull()
                         obj.Save(ctx)
                     }
                 }

@@ -18,6 +18,11 @@ func Zero[T any]() T {
 	return v
 }
 
+func IsZero[T comparable](v T) bool {
+	var zero T
+	return v == zero
+}
+
 // IsNil is a safe test for nil for any kind of variable, and will not panic
 // If i points to a nil object, IsNil will return true, as opposed to i==nil which will return false
 func IsNil(i any) bool {

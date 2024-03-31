@@ -31,7 +31,7 @@ func (o *{{privateName}}Base) Delete(ctx context.Context) {
                           Select(node.{{= ref.AssociatedTable.GoName}}().PrimaryKeyNode()).
                           Get()
                 if obj != nil {
-                   obj.Set{{= ref.AssociatedColumn.GoName}}(nil)
+                   obj.Set{{= ref.AssociatedColumn.GoName}}ToNull()
                    obj.Save(ctx)
                 }
                 o.{{= oRef(ref) }} = nil
@@ -65,7 +65,7 @@ func (o *{{privateName}}Base) Delete(ctx context.Context) {
                           Select(node.{{= ref.AssociatedTable.GoName}}().PrimaryKeyNode()).
                           Load()
                 for _,obj := range objs {
-                   obj.Set{{= ref.AssociatedColumn.GoName}}(nil)
+                   obj.Set{{= ref.AssociatedColumn.GoName}}ToNull()
                    obj.Save(ctx)
                 }
                 o.{{= oRef(ref) }} = nil

@@ -38,7 +38,17 @@ func (c {{= cd.Connector }}) Update(i page.ControlI, data interface{}) {
 {{if col.IsEnum()}}
         data.(*model.{{= t.GoName }}).Set{{= col.ReferenceFunction() }}(model.{{= col.ForeignKey.GoType }}(val))
 {{else}}
+
+{{if col.IsNullable && col.IsReference()}}
+        if any.IsZero(val) {
+            data.(*model.{{= t.GoName }}).Set{{= col.GoName }}ToNull()
+        } else {
+            data.(*model.{{= t.GoName }}).Set{{= col.GoName }}(val)
+        }
+{{else}}
         data.(*model.{{= t.GoName }}).Set{{= col.GoName }}(val)
+{{if}}
+
 {{if}}
     }
 {{if}}

@@ -125,7 +125,7 @@ func (o *{{privateName}}Base) UnmarshalStringMap(m map[string]interface{}) (err 
             }
 {{else}}
             if v == nil {
-                o.Set{{= col.GoName }}(v)
+                o.Set{{= col.GoName }}ToNull()
                 continue
             }
 {{if}}

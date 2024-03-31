@@ -47,21 +47,17 @@ func (d SelectList) GenerateRefresh(ref interface{}, desc *generator.ControlDesc
 func (d SelectList) GenerateUpdate(ref interface{}, desc *generator.ControlDescription) string {
 	col := ref.(*db.Column)
 	var s string
-	if col.IsNullable {
-		s = `var val interface{}`
-	} else {
-		switch col.ColumnType {
-		case query.ColTypeInteger:
-			s = `var val int`
-		case query.ColTypeUnsigned:
-			s = `var val uint`
-		case query.ColTypeInteger64:
-			s = `var val int64`
-		case query.ColTypeUnsigned64:
-			s = `var val uint64`
-		default:
-			s = `var val string`
-		}
+	switch col.ColumnType {
+	case query.ColTypeInteger:
+		s = `var val int`
+	case query.ColTypeUnsigned:
+		s = `var val uint`
+	case query.ColTypeInteger64:
+		s = `var val int64`
+	case query.ColTypeUnsigned64:
+		s = `var val uint64`
+	default:
+		s = `var val string`
 	}
 	s += `
 	sv := ctrl.StringValue()
@@ -80,17 +76,7 @@ func (d SelectList) GenerateUpdate(ref interface{}, desc *generator.ControlDescr
 		s2 = `val = sv`
 	}
 
-	if col.IsNullable {
-		s += fmt.Sprintf(
-			`
-if sv == "" {
-	val = nil
-} else {
-	%s
-}`, s2)
-	} else {
-		s += s2
-	}
+	s += s2
 
 	return s
 }
