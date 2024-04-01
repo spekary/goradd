@@ -163,10 +163,12 @@ func (o *personBase) FirstNameIsValid() bool {
 	return o.firstNameIsValid
 }
 
-// SetFirstName sets the value of FirstName in the object, to be saved later using the Save() function.
+// SetFirstName sets the value of FirstName in the object, to be written to the database later using the Save() function.
 func (o *personBase) SetFirstName(v string) {
 	o.firstNameIsValid = true
-	if o.firstName != v || !o._restored {
+
+	if o.firstName != v ||
+		!o._restored {
 		o.firstName = v
 		o.firstNameIsDirty = true
 	}
@@ -186,17 +188,19 @@ func (o *personBase) LastNameIsValid() bool {
 	return o.lastNameIsValid
 }
 
-// SetLastName sets the value of LastName in the object, to be saved later using the Save() function.
+// SetLastName sets the value of LastName in the object, to be written to the database later using the Save() function.
 func (o *personBase) SetLastName(v string) {
 	o.lastNameIsValid = true
-	if o.lastName != v || !o._restored {
+
+	if o.lastName != v ||
+		!o._restored {
 		o.lastName = v
 		o.lastNameIsDirty = true
 	}
 
 }
 
-// GetAlias returns the alias for the given key.
+// GetAlias returns the alias for the given key, provided the key was used in an aliased query.
 func (o *personBase) GetAlias(key string) query.AliasValue {
 	if a, ok := o._aliases[key]; ok {
 		return query.NewAliasValue(a)
@@ -1144,7 +1148,7 @@ func (o *personBase) update(ctx context.Context) {
 			for _, obj := range objs {
 				if _, ok := o.mProjectsAsManager[obj.PrimaryKey()]; !ok {
 					// The old object is not in the group of new objects
-					obj.SetManagerID(nil)
+					obj.SetManagerIDToNull()
 					obj.Save(ctx)
 				}
 			}

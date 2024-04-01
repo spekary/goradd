@@ -145,10 +145,12 @@ func (o *personWithLockBase) FirstNameIsValid() bool {
 	return o.firstNameIsValid
 }
 
-// SetFirstName sets the value of FirstName in the object, to be saved later using the Save() function.
+// SetFirstName sets the value of FirstName in the object, to be written to the database later using the Save() function.
 func (o *personWithLockBase) SetFirstName(v string) {
 	o.firstNameIsValid = true
-	if o.firstName != v || !o._restored {
+
+	if o.firstName != v ||
+		!o._restored {
 		o.firstName = v
 		o.firstNameIsDirty = true
 	}
@@ -168,10 +170,12 @@ func (o *personWithLockBase) LastNameIsValid() bool {
 	return o.lastNameIsValid
 }
 
-// SetLastName sets the value of LastName in the object, to be saved later using the Save() function.
+// SetLastName sets the value of LastName in the object, to be written to the database later using the Save() function.
 func (o *personWithLockBase) SetLastName(v string) {
 	o.lastNameIsValid = true
-	if o.lastName != v || !o._restored {
+
+	if o.lastName != v ||
+		!o._restored {
 		o.lastName = v
 		o.lastNameIsDirty = true
 	}
@@ -207,28 +211,30 @@ func (o *personWithLockBase) SysTimestamp_I() interface{} {
 	return o.sysTimestamp
 }
 
-func (o *personWithLockBase) SetSysTimestamp(i interface{}) {
+func (o *personWithLockBase) SetSysTimestampToNull() {
 	o.sysTimestampIsValid = true
-	if i == nil {
-		if !o.sysTimestampIsNull {
-			o.sysTimestampIsNull = true
-			o.sysTimestampIsDirty = true
-			o.sysTimestamp = time.Time{}
-		}
-	} else {
-		v := i.(time.Time)
-		if o.sysTimestampIsNull ||
-			!o._restored ||
-			o.sysTimestamp != v {
-
-			o.sysTimestampIsNull = false
-			o.sysTimestamp = v
-			o.sysTimestampIsDirty = true
-		}
+	if !o.sysTimestampIsNull { // only change state if it is not currently null
+		o.sysTimestampIsNull = true
+		o.sysTimestampIsDirty = true
+		o.sysTimestamp = time.Time{}
 	}
 }
 
-// GetAlias returns the alias for the given key.
+// SetSysTimestamp sets the value of SysTimestamp in the object, to be written to the database later using the Save() function.
+func (o *personWithLockBase) SetSysTimestamp(v time.Time) {
+	o.sysTimestampIsValid = true
+
+	if o.sysTimestamp != v ||
+		o.sysTimestampIsNull ||
+		!o._restored {
+		o.sysTimestamp = v
+		o.sysTimestampIsDirty = true
+		o.sysTimestampIsNull = false
+	}
+
+}
+
+// GetAlias returns the alias for the given key, provided the key was used in an aliased query.
 func (o *personWithLockBase) GetAlias(key string) query.AliasValue {
 	if a, ok := o._aliases[key]; ok {
 		return query.NewAliasValue(a)
@@ -962,7 +968,7 @@ func (o *personWithLockBase) UnmarshalStringMap(m map[string]interface{}) (err e
 		case "sysTimestamp":
 			{
 				if v == nil {
-					o.SetSysTimestamp(v)
+					o.SetSysTimestampToNull()
 					continue
 				}
 				switch d := v.(type) {

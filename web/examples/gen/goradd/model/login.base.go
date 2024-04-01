@@ -195,29 +195,32 @@ func (o *loginBase) LoadPerson(ctx context.Context) *Person {
 	return o.oPerson
 }
 
-func (o *loginBase) SetPersonID(i interface{}) {
+func (o *loginBase) SetPersonIDToNull() {
 	o.personIDIsValid = true
-	if i == nil {
-		if !o.personIDIsNull {
-			o.personIDIsNull = true
-			o.personIDIsDirty = true
-			o.personID = ""
-			o.oPerson = nil
-		}
-	} else {
-		v := i.(string)
-		if o.personIDIsNull ||
-			!o._restored ||
-			o.personID != v {
-
-			o.personIDIsNull = false
-			o.personID = v
-			o.personIDIsDirty = true
-			o.oPerson = nil
-		}
+	if !o.personIDIsNull { // only change state if it is not currently null
+		o.personIDIsNull = true
+		o.personIDIsDirty = true
+		o.personID = ""
+		o.oPerson = nil
 	}
 }
 
+// SetPersonID sets the value of PersonID in the object, to be written to the database later using the Save() function.
+func (o *loginBase) SetPersonID(v string) {
+	o.personIDIsValid = true
+
+	if o.personID != v ||
+		o.personIDIsNull ||
+		!o._restored {
+		o.personID = v
+		o.personIDIsDirty = true
+		o.personIDIsNull = false
+		o.oPerson = nil
+	}
+
+}
+
+// SetPerson sets the value of Person in the object, to be saved later using the Save() function.
 func (o *loginBase) SetPerson(v *Person) {
 	o.personIDIsValid = true
 	if v == nil {
@@ -250,10 +253,12 @@ func (o *loginBase) UsernameIsValid() bool {
 	return o.usernameIsValid
 }
 
-// SetUsername sets the value of Username in the object, to be saved later using the Save() function.
+// SetUsername sets the value of Username in the object, to be written to the database later using the Save() function.
 func (o *loginBase) SetUsername(v string) {
 	o.usernameIsValid = true
-	if o.username != v || !o._restored {
+
+	if o.username != v ||
+		!o._restored {
 		o.username = v
 		o.usernameIsDirty = true
 	}
@@ -289,25 +294,27 @@ func (o *loginBase) Password_I() interface{} {
 	return o.password
 }
 
-func (o *loginBase) SetPassword(i interface{}) {
+func (o *loginBase) SetPasswordToNull() {
 	o.passwordIsValid = true
-	if i == nil {
-		if !o.passwordIsNull {
-			o.passwordIsNull = true
-			o.passwordIsDirty = true
-			o.password = ""
-		}
-	} else {
-		v := i.(string)
-		if o.passwordIsNull ||
-			!o._restored ||
-			o.password != v {
-
-			o.passwordIsNull = false
-			o.password = v
-			o.passwordIsDirty = true
-		}
+	if !o.passwordIsNull { // only change state if it is not currently null
+		o.passwordIsNull = true
+		o.passwordIsDirty = true
+		o.password = ""
 	}
+}
+
+// SetPassword sets the value of Password in the object, to be written to the database later using the Save() function.
+func (o *loginBase) SetPassword(v string) {
+	o.passwordIsValid = true
+
+	if o.password != v ||
+		o.passwordIsNull ||
+		!o._restored {
+		o.password = v
+		o.passwordIsDirty = true
+		o.passwordIsNull = false
+	}
+
 }
 
 // IsEnabled returns the loaded value of IsEnabled.
@@ -323,17 +330,19 @@ func (o *loginBase) IsEnabledIsValid() bool {
 	return o.isEnabledIsValid
 }
 
-// SetIsEnabled sets the value of IsEnabled in the object, to be saved later using the Save() function.
+// SetIsEnabled sets the value of IsEnabled in the object, to be written to the database later using the Save() function.
 func (o *loginBase) SetIsEnabled(v bool) {
 	o.isEnabledIsValid = true
-	if o.isEnabled != v || !o._restored {
+
+	if o.isEnabled != v ||
+		!o._restored {
 		o.isEnabled = v
 		o.isEnabledIsDirty = true
 	}
 
 }
 
-// GetAlias returns the alias for the given key.
+// GetAlias returns the alias for the given key, provided the key was used in an aliased query.
 func (o *loginBase) GetAlias(key string) query.AliasValue {
 	if a, ok := o._aliases[key]; ok {
 		return query.NewAliasValue(a)
@@ -1225,7 +1234,7 @@ func (o *loginBase) UnmarshalStringMap(m map[string]interface{}) (err error) {
 		case "personID":
 			{
 				if v == nil {
-					o.SetPersonID(v)
+					o.SetPersonIDToNull()
 					continue
 				}
 				if s, ok := v.(string); !ok {
@@ -1248,7 +1257,7 @@ func (o *loginBase) UnmarshalStringMap(m map[string]interface{}) (err error) {
 		case "password":
 			{
 				if v == nil {
-					o.SetPassword(v)
+					o.SetPasswordToNull()
 					continue
 				}
 				if s, ok := v.(string); !ok {

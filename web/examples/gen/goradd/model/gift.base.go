@@ -105,10 +105,12 @@ func (o *giftBase) NumberIsValid() bool {
 	return o.numberIsValid
 }
 
-// SetNumber sets the value of Number in the object, to be saved later using the Save() function.
+// SetNumber sets the value of Number in the object, to be written to the database later using the Save() function.
 func (o *giftBase) SetNumber(v int) {
 	o.numberIsValid = true
-	if o.number != v || !o._restored {
+
+	if o.number != v ||
+		!o._restored {
 		o.number = v
 		o.numberIsDirty = true
 	}
@@ -128,17 +130,19 @@ func (o *giftBase) NameIsValid() bool {
 	return o.nameIsValid
 }
 
-// SetName sets the value of Name in the object, to be saved later using the Save() function.
+// SetName sets the value of Name in the object, to be written to the database later using the Save() function.
 func (o *giftBase) SetName(v string) {
 	o.nameIsValid = true
-	if o.name != v || !o._restored {
+
+	if o.name != v ||
+		!o._restored {
 		o.name = v
 		o.nameIsDirty = true
 	}
 
 }
 
-// GetAlias returns the alias for the given key.
+// GetAlias returns the alias for the given key, provided the key was used in an aliased query.
 func (o *giftBase) GetAlias(key string) query.AliasValue {
 	if a, ok := o._aliases[key]; ok {
 		return query.NewAliasValue(a)

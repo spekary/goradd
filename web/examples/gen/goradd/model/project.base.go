@@ -266,10 +266,12 @@ func (o *projectBase) NumIsValid() bool {
 	return o.numIsValid
 }
 
-// SetNum sets the value of Num in the object, to be saved later using the Save() function.
+// SetNum sets the value of Num in the object, to be written to the database later using the Save() function.
 func (o *projectBase) SetNum(v int) {
 	o.numIsValid = true
-	if o.num != v || !o._restored {
+
+	if o.num != v ||
+		!o._restored {
 		o.num = v
 		o.numIsDirty = true
 	}
@@ -324,29 +326,32 @@ func (o *projectBase) LoadManager(ctx context.Context) *Person {
 	return o.oManager
 }
 
-func (o *projectBase) SetManagerID(i interface{}) {
+func (o *projectBase) SetManagerIDToNull() {
 	o.managerIDIsValid = true
-	if i == nil {
-		if !o.managerIDIsNull {
-			o.managerIDIsNull = true
-			o.managerIDIsDirty = true
-			o.managerID = ""
-			o.oManager = nil
-		}
-	} else {
-		v := i.(string)
-		if o.managerIDIsNull ||
-			!o._restored ||
-			o.managerID != v {
-
-			o.managerIDIsNull = false
-			o.managerID = v
-			o.managerIDIsDirty = true
-			o.oManager = nil
-		}
+	if !o.managerIDIsNull { // only change state if it is not currently null
+		o.managerIDIsNull = true
+		o.managerIDIsDirty = true
+		o.managerID = ""
+		o.oManager = nil
 	}
 }
 
+// SetManagerID sets the value of ManagerID in the object, to be written to the database later using the Save() function.
+func (o *projectBase) SetManagerID(v string) {
+	o.managerIDIsValid = true
+
+	if o.managerID != v ||
+		o.managerIDIsNull ||
+		!o._restored {
+		o.managerID = v
+		o.managerIDIsDirty = true
+		o.managerIDIsNull = false
+		o.oManager = nil
+	}
+
+}
+
+// SetManager sets the value of Manager in the object, to be saved later using the Save() function.
 func (o *projectBase) SetManager(v *Person) {
 	o.managerIDIsValid = true
 	if v == nil {
@@ -379,10 +384,12 @@ func (o *projectBase) NameIsValid() bool {
 	return o.nameIsValid
 }
 
-// SetName sets the value of Name in the object, to be saved later using the Save() function.
+// SetName sets the value of Name in the object, to be written to the database later using the Save() function.
 func (o *projectBase) SetName(v string) {
 	o.nameIsValid = true
-	if o.name != v || !o._restored {
+
+	if o.name != v ||
+		!o._restored {
 		o.name = v
 		o.nameIsDirty = true
 	}
@@ -418,25 +425,27 @@ func (o *projectBase) Description_I() interface{} {
 	return o.description
 }
 
-func (o *projectBase) SetDescription(i interface{}) {
+func (o *projectBase) SetDescriptionToNull() {
 	o.descriptionIsValid = true
-	if i == nil {
-		if !o.descriptionIsNull {
-			o.descriptionIsNull = true
-			o.descriptionIsDirty = true
-			o.description = ""
-		}
-	} else {
-		v := i.(string)
-		if o.descriptionIsNull ||
-			!o._restored ||
-			o.description != v {
-
-			o.descriptionIsNull = false
-			o.description = v
-			o.descriptionIsDirty = true
-		}
+	if !o.descriptionIsNull { // only change state if it is not currently null
+		o.descriptionIsNull = true
+		o.descriptionIsDirty = true
+		o.description = ""
 	}
+}
+
+// SetDescription sets the value of Description in the object, to be written to the database later using the Save() function.
+func (o *projectBase) SetDescription(v string) {
+	o.descriptionIsValid = true
+
+	if o.description != v ||
+		o.descriptionIsNull ||
+		!o._restored {
+		o.description = v
+		o.descriptionIsDirty = true
+		o.descriptionIsNull = false
+	}
+
 }
 
 // StartDate returns the loaded value of StartDate.
@@ -468,25 +477,27 @@ func (o *projectBase) StartDate_I() interface{} {
 	return o.startDate
 }
 
-func (o *projectBase) SetStartDate(i interface{}) {
+func (o *projectBase) SetStartDateToNull() {
 	o.startDateIsValid = true
-	if i == nil {
-		if !o.startDateIsNull {
-			o.startDateIsNull = true
-			o.startDateIsDirty = true
-			o.startDate = time.Time{}
-		}
-	} else {
-		v := i.(time.Time)
-		if o.startDateIsNull ||
-			!o._restored ||
-			o.startDate != v {
-
-			o.startDateIsNull = false
-			o.startDate = v
-			o.startDateIsDirty = true
-		}
+	if !o.startDateIsNull { // only change state if it is not currently null
+		o.startDateIsNull = true
+		o.startDateIsDirty = true
+		o.startDate = time.Time{}
 	}
+}
+
+// SetStartDate sets the value of StartDate in the object, to be written to the database later using the Save() function.
+func (o *projectBase) SetStartDate(v time.Time) {
+	o.startDateIsValid = true
+
+	if o.startDate != v ||
+		o.startDateIsNull ||
+		!o._restored {
+		o.startDate = v
+		o.startDateIsDirty = true
+		o.startDateIsNull = false
+	}
+
 }
 
 // EndDate returns the loaded value of EndDate.
@@ -518,25 +529,27 @@ func (o *projectBase) EndDate_I() interface{} {
 	return o.endDate
 }
 
-func (o *projectBase) SetEndDate(i interface{}) {
+func (o *projectBase) SetEndDateToNull() {
 	o.endDateIsValid = true
-	if i == nil {
-		if !o.endDateIsNull {
-			o.endDateIsNull = true
-			o.endDateIsDirty = true
-			o.endDate = time.Time{}
-		}
-	} else {
-		v := i.(time.Time)
-		if o.endDateIsNull ||
-			!o._restored ||
-			o.endDate != v {
-
-			o.endDateIsNull = false
-			o.endDate = v
-			o.endDateIsDirty = true
-		}
+	if !o.endDateIsNull { // only change state if it is not currently null
+		o.endDateIsNull = true
+		o.endDateIsDirty = true
+		o.endDate = time.Time{}
 	}
+}
+
+// SetEndDate sets the value of EndDate in the object, to be written to the database later using the Save() function.
+func (o *projectBase) SetEndDate(v time.Time) {
+	o.endDateIsValid = true
+
+	if o.endDate != v ||
+		o.endDateIsNull ||
+		!o._restored {
+		o.endDate = v
+		o.endDateIsDirty = true
+		o.endDateIsNull = false
+	}
+
 }
 
 // Budget returns the loaded value of Budget.
@@ -568,25 +581,27 @@ func (o *projectBase) Budget_I() interface{} {
 	return o.budget
 }
 
-func (o *projectBase) SetBudget(i interface{}) {
+func (o *projectBase) SetBudgetToNull() {
 	o.budgetIsValid = true
-	if i == nil {
-		if !o.budgetIsNull {
-			o.budgetIsNull = true
-			o.budgetIsDirty = true
-			o.budget = ""
-		}
-	} else {
-		v := i.(string)
-		if o.budgetIsNull ||
-			!o._restored ||
-			o.budget != v {
-
-			o.budgetIsNull = false
-			o.budget = v
-			o.budgetIsDirty = true
-		}
+	if !o.budgetIsNull { // only change state if it is not currently null
+		o.budgetIsNull = true
+		o.budgetIsDirty = true
+		o.budget = ""
 	}
+}
+
+// SetBudget sets the value of Budget in the object, to be written to the database later using the Save() function.
+func (o *projectBase) SetBudget(v string) {
+	o.budgetIsValid = true
+
+	if o.budget != v ||
+		o.budgetIsNull ||
+		!o._restored {
+		o.budget = v
+		o.budgetIsDirty = true
+		o.budgetIsNull = false
+	}
+
 }
 
 // Spent returns the loaded value of Spent.
@@ -618,28 +633,30 @@ func (o *projectBase) Spent_I() interface{} {
 	return o.spent
 }
 
-func (o *projectBase) SetSpent(i interface{}) {
+func (o *projectBase) SetSpentToNull() {
 	o.spentIsValid = true
-	if i == nil {
-		if !o.spentIsNull {
-			o.spentIsNull = true
-			o.spentIsDirty = true
-			o.spent = ""
-		}
-	} else {
-		v := i.(string)
-		if o.spentIsNull ||
-			!o._restored ||
-			o.spent != v {
-
-			o.spentIsNull = false
-			o.spent = v
-			o.spentIsDirty = true
-		}
+	if !o.spentIsNull { // only change state if it is not currently null
+		o.spentIsNull = true
+		o.spentIsDirty = true
+		o.spent = ""
 	}
 }
 
-// GetAlias returns the alias for the given key.
+// SetSpent sets the value of Spent in the object, to be written to the database later using the Save() function.
+func (o *projectBase) SetSpent(v string) {
+	o.spentIsValid = true
+
+	if o.spent != v ||
+		o.spentIsNull ||
+		!o._restored {
+		o.spent = v
+		o.spentIsDirty = true
+		o.spentIsNull = false
+	}
+
+}
+
+// GetAlias returns the alias for the given key, provided the key was used in an aliased query.
 func (o *projectBase) GetAlias(key string) query.AliasValue {
 	if a, ok := o._aliases[key]; ok {
 		return query.NewAliasValue(a)
@@ -2908,7 +2925,7 @@ func (o *projectBase) UnmarshalStringMap(m map[string]interface{}) (err error) {
 		case "managerID":
 			{
 				if v == nil {
-					o.SetManagerID(v)
+					o.SetManagerIDToNull()
 					continue
 				}
 				if s, ok := v.(string); !ok {
@@ -2931,7 +2948,7 @@ func (o *projectBase) UnmarshalStringMap(m map[string]interface{}) (err error) {
 		case "description":
 			{
 				if v == nil {
-					o.SetDescription(v)
+					o.SetDescriptionToNull()
 					continue
 				}
 				if s, ok := v.(string); !ok {
@@ -2943,7 +2960,7 @@ func (o *projectBase) UnmarshalStringMap(m map[string]interface{}) (err error) {
 		case "startDate":
 			{
 				if v == nil {
-					o.SetStartDate(v)
+					o.SetStartDateToNull()
 					continue
 				}
 				switch d := v.(type) {
@@ -2966,7 +2983,7 @@ func (o *projectBase) UnmarshalStringMap(m map[string]interface{}) (err error) {
 		case "endDate":
 			{
 				if v == nil {
-					o.SetEndDate(v)
+					o.SetEndDateToNull()
 					continue
 				}
 				switch d := v.(type) {
@@ -2989,7 +3006,7 @@ func (o *projectBase) UnmarshalStringMap(m map[string]interface{}) (err error) {
 		case "budget":
 			{
 				if v == nil {
-					o.SetBudget(v)
+					o.SetBudgetToNull()
 					continue
 				}
 				if s, ok := v.(string); !ok {
@@ -3001,7 +3018,7 @@ func (o *projectBase) UnmarshalStringMap(m map[string]interface{}) (err error) {
 		case "spent":
 			{
 				if v == nil {
-					o.SetSpent(v)
+					o.SetSpentToNull()
 					continue
 				}
 				if s, ok := v.(string); !ok {

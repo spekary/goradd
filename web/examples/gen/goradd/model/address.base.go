@@ -164,10 +164,12 @@ func (o *addressBase) LoadPerson(ctx context.Context) *Person {
 	return o.oPerson
 }
 
-// SetPersonID sets the value of PersonID in the object, to be saved later using the Save() function.
+// SetPersonID sets the value of PersonID in the object, to be written to the database later using the Save() function.
 func (o *addressBase) SetPersonID(v string) {
 	o.personIDIsValid = true
-	if o.personID != v || !o._restored {
+
+	if o.personID != v ||
+		!o._restored {
 		o.personID = v
 		o.personIDIsDirty = true
 		o.oPerson = nil
@@ -202,10 +204,12 @@ func (o *addressBase) StreetIsValid() bool {
 	return o.streetIsValid
 }
 
-// SetStreet sets the value of Street in the object, to be saved later using the Save() function.
+// SetStreet sets the value of Street in the object, to be written to the database later using the Save() function.
 func (o *addressBase) SetStreet(v string) {
 	o.streetIsValid = true
-	if o.street != v || !o._restored {
+
+	if o.street != v ||
+		!o._restored {
 		o.street = v
 		o.streetIsDirty = true
 	}
@@ -241,28 +245,30 @@ func (o *addressBase) City_I() interface{} {
 	return o.city
 }
 
-func (o *addressBase) SetCity(i interface{}) {
+func (o *addressBase) SetCityToNull() {
 	o.cityIsValid = true
-	if i == nil {
-		if !o.cityIsNull {
-			o.cityIsNull = true
-			o.cityIsDirty = true
-			o.city = "BOB"
-		}
-	} else {
-		v := i.(string)
-		if o.cityIsNull ||
-			!o._restored ||
-			o.city != v {
-
-			o.cityIsNull = false
-			o.city = v
-			o.cityIsDirty = true
-		}
+	if !o.cityIsNull { // only change state if it is not currently null
+		o.cityIsNull = true
+		o.cityIsDirty = true
+		o.city = "BOB"
 	}
 }
 
-// GetAlias returns the alias for the given key.
+// SetCity sets the value of City in the object, to be written to the database later using the Save() function.
+func (o *addressBase) SetCity(v string) {
+	o.cityIsValid = true
+
+	if o.city != v ||
+		o.cityIsNull ||
+		!o._restored {
+		o.city = v
+		o.cityIsDirty = true
+		o.cityIsNull = false
+	}
+
+}
+
+// GetAlias returns the alias for the given key, provided the key was used in an aliased query.
 func (o *addressBase) GetAlias(key string) query.AliasValue {
 	if a, ok := o._aliases[key]; ok {
 		return query.NewAliasValue(a)
@@ -1049,7 +1055,7 @@ func (o *addressBase) UnmarshalStringMap(m map[string]interface{}) (err error) {
 		case "city":
 			{
 				if v == nil {
-					o.SetCity(v)
+					o.SetCityToNull()
 					continue
 				}
 				if s, ok := v.(string); !ok {

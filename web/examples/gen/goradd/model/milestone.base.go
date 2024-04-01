@@ -149,10 +149,12 @@ func (o *milestoneBase) LoadProject(ctx context.Context) *Project {
 	return o.oProject
 }
 
-// SetProjectID sets the value of ProjectID in the object, to be saved later using the Save() function.
+// SetProjectID sets the value of ProjectID in the object, to be written to the database later using the Save() function.
 func (o *milestoneBase) SetProjectID(v string) {
 	o.projectIDIsValid = true
-	if o.projectID != v || !o._restored {
+
+	if o.projectID != v ||
+		!o._restored {
 		o.projectID = v
 		o.projectIDIsDirty = true
 		o.oProject = nil
@@ -187,17 +189,19 @@ func (o *milestoneBase) NameIsValid() bool {
 	return o.nameIsValid
 }
 
-// SetName sets the value of Name in the object, to be saved later using the Save() function.
+// SetName sets the value of Name in the object, to be written to the database later using the Save() function.
 func (o *milestoneBase) SetName(v string) {
 	o.nameIsValid = true
-	if o.name != v || !o._restored {
+
+	if o.name != v ||
+		!o._restored {
 		o.name = v
 		o.nameIsDirty = true
 	}
 
 }
 
-// GetAlias returns the alias for the given key.
+// GetAlias returns the alias for the given key, provided the key was used in an aliased query.
 func (o *milestoneBase) GetAlias(key string) query.AliasValue {
 	if a, ok := o._aliases[key]; ok {
 		return query.NewAliasValue(a)

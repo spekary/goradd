@@ -149,10 +149,12 @@ func (o *employeeInfoBase) LoadPerson(ctx context.Context) *Person {
 	return o.oPerson
 }
 
-// SetPersonID sets the value of PersonID in the object, to be saved later using the Save() function.
+// SetPersonID sets the value of PersonID in the object, to be written to the database later using the Save() function.
 func (o *employeeInfoBase) SetPersonID(v string) {
 	o.personIDIsValid = true
-	if o.personID != v || !o._restored {
+
+	if o.personID != v ||
+		!o._restored {
 		o.personID = v
 		o.personIDIsDirty = true
 		o.oPerson = nil
@@ -187,17 +189,19 @@ func (o *employeeInfoBase) EmployeeNumberIsValid() bool {
 	return o.employeeNumberIsValid
 }
 
-// SetEmployeeNumber sets the value of EmployeeNumber in the object, to be saved later using the Save() function.
+// SetEmployeeNumber sets the value of EmployeeNumber in the object, to be written to the database later using the Save() function.
 func (o *employeeInfoBase) SetEmployeeNumber(v int) {
 	o.employeeNumberIsValid = true
-	if o.employeeNumber != v || !o._restored {
+
+	if o.employeeNumber != v ||
+		!o._restored {
 		o.employeeNumber = v
 		o.employeeNumberIsDirty = true
 	}
 
 }
 
-// GetAlias returns the alias for the given key.
+// GetAlias returns the alias for the given key, provided the key was used in an aliased query.
 func (o *employeeInfoBase) GetAlias(key string) query.AliasValue {
 	if a, ok := o._aliases[key]; ok {
 		return query.NewAliasValue(a)
