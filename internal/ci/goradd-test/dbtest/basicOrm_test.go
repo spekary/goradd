@@ -26,6 +26,7 @@ func TestBasic(t *testing.T) {
 	if people[0].FirstName() != "John" {
 		t.Error("First person is not John")
 	}
+
 }
 
 func TestSort(t *testing.T) {

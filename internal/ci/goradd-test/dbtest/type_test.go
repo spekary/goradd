@@ -49,7 +49,7 @@ func TestTimestamp(t *testing.T) {
 	rec2.Save(ctx)
 
 	// Make sure setting null value sets to default of current time
-	rec.SetTs(nil)
+	rec.SetTsToNull()
 	assert.Greater(t, 1.0, time.Since(rec.Ts()).Seconds())
 }
 
@@ -83,7 +83,7 @@ func TestDateTime(t *testing.T) {
 	rec2.Save(ctx)
 
 	// Make sure setting null value sets to default
-	rec.SetDateTime(nil)
+	rec.SetDateTimeToNull()
 	assert.True(t, rec.DateTime().IsZero())
 
 }
