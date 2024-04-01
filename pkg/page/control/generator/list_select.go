@@ -16,7 +16,10 @@ type SelectList struct {
 }
 
 func (d SelectList) Imports() []string {
-	return []string{"strconv"}
+	return []string{
+		"strconv",
+		"github.com/goradd/goradd/pkg/any",
+	}
 }
 
 func (d SelectList) SupportsColumn(ref interface{}) bool {
