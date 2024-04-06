@@ -1,5 +1,5 @@
-// Package any has general purpose utility functions for working with interfaces and generic types.
-package any
+// Package generic has general purpose utility functions for working with interfaces and generic types.
+package generic
 
 import "reflect"
 

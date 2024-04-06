@@ -24,11 +24,8 @@ func (d Span) SupportsColumn(ref interface{}) bool {
 func (d Span) GenerateCreator(ref interface{}, desc *generator.ControlDescription) (s string) {
 	s = fmt.Sprintf(
 		`%s.SpanCreator{
-	ID:        p.ID() + "-%s",
-	ControlOptions: page.ControlOptions{
-		DataConnector: %s{},
-	},
-}`, desc.Package, desc.ControlID, desc.Connector)
+			ID:        p.ID() + "-" + %s,
+}`, desc.Package, desc.ControlIDConst())
 	return
 }
 
@@ -40,6 +37,6 @@ func (d Span) GenerateUpdate(ref interface{}, desc *generator.ControlDescription
 	return ""
 }
 
-func (d Span) GenerateModifies(ref interface{}, desc *generator.ControlDescription) (s string) {
+func (d Span) GenerateChanged(ref interface{}, desc *generator.ControlDescription) (s string) {
 	return ""
 }

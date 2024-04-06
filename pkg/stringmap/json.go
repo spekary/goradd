@@ -5,14 +5,14 @@ import (
 	"io/ioutil"
 )
 
-// Converts a json map to a stringmap
+// FromJson converts a json map to a stringmap
 // Integers come through as float64, so must be converted to int to be used
-func FromJson(j []byte)  (out map[string]interface{}, err error) {
+func FromJson(j []byte) (out map[string]interface{}, err error) {
 	err = json.Unmarshal(j, &out)
 	return
 }
 
-func FromJsonFile(f string)  (out map[string]interface{}, err error) {
+func FromJsonFile(f string) (out map[string]interface{}, err error) {
 	c, err := ioutil.ReadFile(f)
 
 	if err != nil {
@@ -21,4 +21,3 @@ func FromJsonFile(f string)  (out map[string]interface{}, err error) {
 
 	return FromJson(c)
 }
-

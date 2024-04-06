@@ -35,17 +35,14 @@ func (d CheckboxList) SupportsColumn(ref interface{}) bool {
 func (d CheckboxList) GenerateCreator(ref interface{}, desc *generator.ControlDescription) (s string) {
 	s = fmt.Sprintf(
 		`%s.CheckboxListCreator{
-	ID:           p.ID() + "-%s",
+			ID:        p.ID() + "-" + %s,
 	DataProvider: p,
-	ControlOptions: page.ControlOptions{
-		DataConnector: %s{},
-	},
-}`, desc.Package, desc.ControlID, desc.Connector)
+}`, desc.Package, desc.ControlIDConst())
 	return
 }
 
 func (d CheckboxList) GenerateRefresh(ref interface{}, desc *generator.ControlDescription) string {
-	return `ctrl.SetValue(objects)`
+	return `ctrl.SetValue(val)`
 }
 
 func (d CheckboxList) GenerateUpdate(ref interface{}, desc *generator.ControlDescription) string {
@@ -67,7 +64,7 @@ func (d CheckboxList) GenerateUpdate(ref interface{}, desc *generator.ControlDes
 	return ``
 }
 
-func (d CheckboxList) GenerateModifies(ref interface{}, desc *generator.ControlDescription) string {
+func (d CheckboxList) GenerateChanged(ref interface{}, desc *generator.ControlDescription) string {
 	switch ref.(type) {
 	case *db.ReverseReference:
 		return `!list.IDerStringListCompare(val, ctrl.SelectedValues())`
@@ -81,12 +78,12 @@ func (d CheckboxList) GenerateModifies(ref interface{}, desc *generator.ControlD
 func (d CheckboxList) GenerateProvider(ref interface{}, desc *generator.ControlDescription) string {
 	switch col := ref.(type) {
 	case *db.ReverseReference:
-		return fmt.Sprintf(`return model.Query%s(ctx).LoadI()`, col.AssociatedTable.GoPlural)
+		return fmt.Sprintf(`model.Query%s(ctx).LoadI()`, col.AssociatedTable.GoPlural)
 	case *db.ManyManyReference:
 		if col.IsEnumAssociation {
-			return fmt.Sprintf(`return model.All%sI()`, col.ObjectTypes())
+			return fmt.Sprintf(`model.All%sI()`, col.ObjectTypes())
 		} else {
-			return fmt.Sprintf(`return model.Query%s(ctx).LoadI()`, col.ObjectTypes())
+			return fmt.Sprintf(`model.Query%s(ctx).LoadI()`, col.ObjectTypes())
 		}
 	}
 	return ``

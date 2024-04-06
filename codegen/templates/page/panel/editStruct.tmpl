@@ -1,0 +1,12 @@
+// editStruct.tmpl
+
+{{
+
+// {{= panelName }} is the code generated edit panel.
+type {{= panelName }} struct {
+	{{= ctrlPkg }}.Panel
+    {{= t.GoName }} *model.{{= t.GoName }}
+}
+
+}}
+

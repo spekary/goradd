@@ -20,11 +20,10 @@ func (d PhoneTextbox) GenerateCreator(ref interface{}, desc *generator2.ControlD
 	col := ref.(*db.Column)
 	s = fmt.Sprintf(
 		`%s.PhoneTextboxCreator{
-			ID:        p.ID() + "-%s",
+			ID:        p.ID() + "-" + %s,
 			ControlOptions: page.ControlOptions{
 				IsRequired:      %#v,
-				DataConnector: %s{},
 			},
-		}`, desc.Package, desc.ControlID, !col.IsNullable, desc.Connector)
+		}`, desc.Package, desc.ControlIDConst(), !col.IsNullable)
 	return
 }

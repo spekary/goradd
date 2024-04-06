@@ -1,0 +1,41 @@
+// editLoad.tmpl
+
+{{
+// Load puts data from the database into the edit panel.
+// pk is the primary key of a model.{{= t.GoName }} database record.
+func (p *{{= panelName }}) Load(ctx context.Context, pk string) (err error) {
+	if pk == "" {
+		p.{{= t.GoName }} = model.New{{= t.GoName }}()
+	} else {
+{{if t.PrimaryKeyColumn().ColumnType == query.ColTypeString }}
+		p.{{= t.GoName }} = model.Load{{= t.GoName }}(ctx, pk,
+{{else}}
+        {{# convert from string to pk type }}
+        pk2 := query.{{= t.PrimaryKeyColumn().ColumnType.String() }}.FromString(pk).({{= t.PrimaryKeyGoType() }})
+		p.{{= t.GoName }} = model.Load{{= t.GoName }}(ctx, pk2,
+{{if}}
+{{for _,col := range t.Columns}}
+{{if col.IsReference() }}
+            node.{{= t.GoName}}().{{= col.ReferenceFunction()}}(),
+{{if}}
+{{for}}
+{{for _,ref := range t.ReverseReferences}}
+{{if ref.IsUnique() }}
+            node.{{= t.GoName}}().{{= ref.GoName}}(),
+{{else}}
+            node.{{= t.GoName}}().{{= ref.GoPlural}}(),
+{{if}}
+{{for}}
+{{for _,ref := range t.ManyManyReferences}}
+            node.{{= t.GoName}}().{{= ref.GoPlural}}(),
+{{for}}
+		)
+
+		if p.{{= t.GoName }} == nil {
+			return page.NewFrameworkError(page.FrameworkErrRecordNotFound)
+		}
+	}
+	p.Refresh()
+	return nil
+}
+}}

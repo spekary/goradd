@@ -22,13 +22,13 @@ func (p *{{= panelName }}) {{= cd.ControlName }}Creator() {{= defaultWrapperType
 
 // {{= cd.ControlName }}() returns the {{= cd.ControlName }} control if it exists. Otherwise it will return nil.
 func (p *{{= panelName }}) {{= cd.ControlName }}() *{{= cd.Package }}.{{= cd.ControlType }} {
-    id := p.ID() + "-" + {{= t.GoName }}{{= cd.ControlIDConst() }}
+    id := p.ID() + "-" + {{= cd.ControlIDConst() }}
     return page.Control[*{{= cd.Package }}.{{= cd.ControlType }}](p.Page(), id)
 }
 
 // {{= cd.ControlName }}Wrapper() returns the wrapper of the {{= cd.ControlName }} control if it exists. Otherwise it will return nil.
 func (p *{{= panelName }}) {{= cd.ControlName }}Wrapper() *{{= defaultWrapperType }} {
-    id := p.ID() + "-" + {{= t.GoName }}{{= cd.ControlIDConst() }} + config.DefaultFormFieldWrapperIdSuffix
+    id := p.ID() + "-" + {{= cd.ControlIDConst() }} + config.DefaultFormFieldWrapperIdSuffix
     return page.Control[*{{= defaultWrapperType }}](p.Page(), id)
 }
 
@@ -54,7 +54,7 @@ func (p *{{= panelName }}) {{= cd.ControlName }}Creator() {{= defaultWrapperType
 
 // {{= cd.ControlName }}() returns the {{= cd.ControlName }} control, or nil if the control is not in the panel.
 func (p *{{= panelName }}) {{= cd.ControlName }}() *{{= cd.Package }}.{{= cd.ControlType }} {
-    id := p.ID() + "-" + {{= t.GoName }}{{= cd.ControlIDConst() }}
+    id := p.ID() + "-" + {{= cd.ControlIDConst() }}
     return page.Control[*{{= cd.Package }}.{{= cd.ControlType }}](p.Page(), id)
 }
 
@@ -79,7 +79,7 @@ func (p *{{= panelName }}) {{= cd.ControlName }}Creator() {{= defaultWrapperType
 
 // {{= cd.ControlName }} returns the {{= cd.ControlName }}, or nil if the {{= cd.ControlName }} is not in the panel.
 func (p *{{= panelName }}) {{= cd.ControlName }}() *{{= cd.Package }}.{{= cd.ControlType }} {
-    id := p.ID() + "-" + {{= t.GoName }}{{= cd.ControlIDConst() }}
+    id := p.ID() + "-" + {{= cd.ControlIDConst() }}
     return page.Control[*{{= cd.Package }}.{{= cd.ControlType }}](p.Page(), id)
 }
 

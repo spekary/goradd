@@ -2,7 +2,7 @@ package list
 
 import (
 	"context"
-	reflect2 "github.com/goradd/goradd/pkg/any"
+	reflect2 "github.com/goradd/goradd/pkg/generic"
 	control2 "github.com/goradd/goradd/pkg/page/control"
 	"io"
 	"reflect"

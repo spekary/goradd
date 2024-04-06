@@ -26,12 +26,11 @@ func (d Checkbox) GenerateCreator(ref interface{}, desc *generator.ControlDescri
 	col := ref.(*db.Column)
 	s = fmt.Sprintf(
 		`%s.CheckboxCreator{
-			ID:        p.ID() + "-%s",
+			ID:        p.ID() + "-" + %s,
 			ControlOptions: page.ControlOptions{
 				IsRequired:      %#v,
-				DataConnector: %s{},
 			},
-		}`, desc.Package, desc.ControlID, !col.IsNullable, desc.Connector)
+		}`, desc.Package, desc.ControlIDConst(), !col.IsNullable)
 	return
 }
 
@@ -43,6 +42,6 @@ func (d Checkbox) GenerateUpdate(ref interface{}, desc *generator.ControlDescrip
 	return `val := ctrl.Checked()`
 }
 
-func (d Checkbox) GenerateModifies(ref interface{}, desc *generator.ControlDescription) (s string) {
+func (d Checkbox) GenerateChanged(ref interface{}, desc *generator.ControlDescription) (s string) {
 	return `val != ctrl.Checked()`
 }

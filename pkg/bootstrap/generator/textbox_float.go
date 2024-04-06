@@ -21,11 +21,10 @@ func (d FloatTextbox) GenerateCreator(ref interface{}, desc *generator2.ControlD
 
 	s = fmt.Sprintf(
 		`%s.FloatTextboxCreator{
-			ID:        p.ID() + "-%s",
+			ID:        p.ID() + "-" + %s,
 			ControlOptions: page.ControlOptions{
 				IsRequired:      %#v,
-				DataConnector: %s{},
 			},
-		}`, desc.Package, desc.ControlID, !col.IsNullable, desc.Connector)
+		}`, desc.Package, desc.ControlIDConst(), !col.IsNullable)
 	return
 }

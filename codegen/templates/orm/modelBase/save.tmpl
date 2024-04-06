@@ -75,6 +75,11 @@ func (o *{{privateName}}Base) update(ctx context.Context) {
                           Where(In(node.{{= ref.GoType}}().PrimaryKeyNode(), o.s{{= ref.GoPlural }}PKs...)).
                           Select(node.{{= ref.GoType}}().{{= ref.AssociatedColumn.GoName}}()).
                           Load()
+
+                    if o.{{= mapPrefix }}{{= ref.GoPlural }} == nil {
+                        o.{{= mapPrefix }}{{= ref.GoPlural }} = make(map[{{= ref.PrimaryKeyType() }}] *{{= ref.GoType }})
+                    }
+
                     for _,obj := range objs {
                         if _,ok := o.{{= mapPrefix }}{{= ref.GoPlural }}[obj.PrimaryKey()]; !ok {
                             o.{{= mapPrefix }}{{= ref.GoPlural }}[obj.PrimaryKey()] = obj

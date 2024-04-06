@@ -28,13 +28,12 @@ func (d Textbox) GenerateCreator(ref interface{}, desc *generator.ControlDescrip
 	col := ref.(*db.Column)
 	s = fmt.Sprintf(
 		`%s.TextboxCreator{
-			ID:        p.ID() + "-%s",
+			ID:        p.ID() + "-" + %s,
 			MaxLength: %d,
 			ControlOptions: page.ControlOptions{
 				IsRequired:      %#v,
-				DataConnector: %s{},
 			},
-		}`, desc.Package, desc.ControlID, col.MaxCharLength, !col.IsNullable, desc.Connector)
+		}`, desc.Package, desc.ControlIDConst(), col.MaxCharLength, !col.IsNullable)
 	return
 }
 
@@ -46,6 +45,6 @@ func (d Textbox) GenerateUpdate(ref interface{}, desc *generator.ControlDescript
 	return `val := ctrl.Text()`
 }
 
-func (d Textbox) GenerateModifies(ref interface{}, desc *generator.ControlDescription) (s string) {
+func (d Textbox) GenerateChanged(ref interface{}, desc *generator.ControlDescription) (s string) {
 	return `val != ctrl.Text()`
 }

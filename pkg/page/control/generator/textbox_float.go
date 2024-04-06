@@ -29,8 +29,8 @@ func (d FloatTextbox) GenerateCreator(ref interface{}, desc *generator.ControlDe
 
 	s = fmt.Sprintf(
 		`%s.FloatTextboxCreator{
-			ID:        p.ID() + "-%s",
-`, desc.Package, desc.ControlID)
+			ID:        p.ID() + "-" + %s,
+`, desc.Package, desc.ControlIDConst())
 
 	s += `    // Set this with a "min" value in the column comment. For example: {"min":1.00}
     MinValue: &textbox.FloatLimit{
@@ -46,9 +46,8 @@ func (d FloatTextbox) GenerateCreator(ref interface{}, desc *generator.ControlDe
 	s += fmt.Sprintf(`
 			ControlOptions: page.ControlOptions{
 				IsRequired:      %#v,
-				DataConnector: %s{},
 			},
-		}`, !col.IsNullable, desc.Connector)
+		}`, !col.IsNullable)
 	return
 }
 
@@ -64,6 +63,6 @@ func (d FloatTextbox) GenerateUpdate(ref interface{}, desc *generator.ControlDes
 		return `val := ctrl.Float64()`
 	}
 }
-func (d FloatTextbox) GenerateModifies(ref interface{}, desc *generator.ControlDescription) (s string) {
+func (d FloatTextbox) GenerateChanged(ref interface{}, desc *generator.ControlDescription) (s string) {
 	return `val != ctrl.Value()`
 }

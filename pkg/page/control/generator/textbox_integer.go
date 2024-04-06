@@ -31,8 +31,8 @@ func (d IntegerTextbox) GenerateCreator(ref interface{}, desc *generator.Control
 	sMaxVal := fmt.Sprintf("%v", col.MaxValue)
 	s = fmt.Sprintf(
 		`%s.IntegerTextboxCreator{
-	ID:        p.ID() + "-%s",
-`, desc.Package, desc.ControlID)
+			ID:        p.ID() + "-" + %s,
+`, desc.Package, desc.ControlIDConst())
 	s += `    // Set this with a "min" value in the column comment. For example: {"min":100}
     MinValue: &textbox.IntegerLimit{
 		Value: ` + sMinVal + `,
@@ -46,9 +46,8 @@ func (d IntegerTextbox) GenerateCreator(ref interface{}, desc *generator.Control
 `
 	s += fmt.Sprintf(`	ControlOptions: page.ControlOptions{
 		IsRequired:      %#v,
-		DataConnector: %s{},
 	},
-}`, !col.IsNullable, desc.Connector)
+}`, !col.IsNullable)
 	return
 }
 
@@ -71,6 +70,6 @@ func (d IntegerTextbox) GenerateUpdate(ref interface{}, desc *generator.ControlD
 	panic("not a compatible column type")
 }
 
-func (d IntegerTextbox) GenerateModifies(ref interface{}, desc *generator.ControlDescription) (s string) {
+func (d IntegerTextbox) GenerateChanged(ref interface{}, desc *generator.ControlDescription) (s string) {
 	return `val != ctrl.Value()`
 }

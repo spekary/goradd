@@ -1,0 +1,37 @@
+// editControlCreators.tmpl
+
+{{
+
+{{for _,col := range dbRefs}}
+{{g
+        cd := t.ControlDescription(col)
+        if cd == nil || cd.Generator == nil {continue}
+        cd.Package = codegen.ObjectPackage(cd.Path)
+        creatorString := cd.Generator.GenerateCreator(col, cd)
+        if creatorString == "" {continue}
+        creatorString = codegen.WrapFormField(defaultWrapperType, cd.DefaultLabel, cd.ControlIDConst(), creatorString)
+}}
+
+
+// {{= cd.ControlName }}Creator returns a creator for the {{= cd.ControlName }} control.
+func (p *{{= panelName }}) {{= cd.ControlName }}Creator() {{= defaultWrapperType }}Creator {
+	return {{= creatorString }}
+}
+
+// {{= cd.ControlName }} returns the {{= cd.ControlName }} control if it exists. Otherwise, it will return nil.
+func (p *{{= panelName }}) {{= cd.ControlName }}() *{{= cd.Package }}.{{= cd.ControlType }} {
+    id := p.ID() + "-" + {{= cd.ControlIDConst() }}
+    return page.Control[*{{= cd.Package }}.{{= cd.ControlType }}](p.Page(), id)
+}
+
+// {{= cd.ControlName }}Wrapper returns the wrapper of the {{= cd.ControlName }} control if it exists. Otherwise, it will return nil.
+func (p *{{= panelName }}) {{= cd.ControlName }}Wrapper() *{{= defaultWrapperType }} {
+    id := p.ID() + "-" + {{= cd.ControlIDConst() }} + config.DefaultFormFieldWrapperIdSuffix
+    return page.Control[*{{= defaultWrapperType }}](p.Page(), id)
+}
+
+{{for}}
+
+
+}}
+

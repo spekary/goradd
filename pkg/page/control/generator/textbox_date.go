@@ -36,13 +36,12 @@ func (d DateTextbox) GenerateCreator(ref interface{}, desc *generator.ControlDes
 	}
 	s = fmt.Sprintf(
 		`%s.DateTextboxCreator{
-	ID:        p.ID() + "-%s",
+			ID:        p.ID() + "-" + %s,
 	Formats:    []string{%#v},
 	ControlOptions: page.ControlOptions{
 		IsRequired:      %#v,
-		DataConnector: %s{},
 	},
-}`, desc.Package, desc.ControlID, format, !col.IsNullable, desc.Connector)
+}`, desc.Package, desc.ControlIDConst(), format, !col.IsNullable)
 	return
 }
 
@@ -54,6 +53,6 @@ func (d DateTextbox) GenerateUpdate(ref interface{}, desc *generator.ControlDesc
 	return `val := ctrl.Date()`
 }
 
-func (d DateTextbox) GenerateModifies(ref interface{}, desc *generator.ControlDescription) (s string) {
+func (d DateTextbox) GenerateChanged(ref interface{}, desc *generator.ControlDescription) (s string) {
 	return `val != ctrl.Date()`
 }

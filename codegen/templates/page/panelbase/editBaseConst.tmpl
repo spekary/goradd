@@ -10,7 +10,7 @@ const (
         cd := t.ControlDescription(col)
         if cd ==  nil {continue}
 {{
-    {{= t.GoName }}{{= cd.ControlIDConst() }} = "{{= cd.ControlID }}"
+    {{= cd.ControlIDConst() }} = "{{= cd.ControlID }}"
 }}
     }
 
@@ -18,7 +18,7 @@ const (
         cd := t.ControlDescription(ref)
         if cd ==  nil {continue}
 {{
-    {{= t.GoName }}{{= cd.ControlIDConst() }} = "{{= cd.ControlID }}"
+    {{= cd.ControlIDConst() }} = "{{= cd.ControlID }}"
 }}
     }
 
@@ -26,7 +26,7 @@ const (
         cd := t.ControlDescription(ref)
         if cd ==  nil {continue}
 {{
-    {{= t.GoName }}{{= cd.ControlIDConst() }} = "{{= cd.ControlID }}"
+    {{= cd.ControlIDConst() }} = "{{= cd.ControlID }}"
 }}
     }
 

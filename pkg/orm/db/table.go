@@ -5,6 +5,11 @@ import (
 	"github.com/kenshaw/snaker"
 )
 
+// A Reference is either a column, a reverse reference, or a many-many reference and represents an edge
+// of the database graph.
+type Reference interface {
+}
+
 type Table struct {
 	// DbKey is the key of the database in the global database cluster that this table belongs to
 	DbKey string
@@ -104,4 +109,20 @@ func (t *Table) HasGetterName(name string) (hasName bool, desc string) {
 		}
 	}
 	return false, ""
+}
+
+func (t *Table) AllReferences() (dbRefs []Reference) {
+	for _, col := range t.Columns {
+		if col.IsId {
+			continue
+		}
+		dbRefs = append(dbRefs, col)
+	}
+	for _, ref := range t.ReverseReferences {
+		dbRefs = append(dbRefs, ref)
+	}
+	for _, ref := range t.ManyManyReferences {
+		dbRefs = append(dbRefs, ref)
+	}
+	return
 }

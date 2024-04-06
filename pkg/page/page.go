@@ -10,7 +10,7 @@ import (
 	"context"
 	"encoding/gob"
 	"fmt"
-	reflect2 "github.com/goradd/goradd/pkg/any"
+	reflect2 "github.com/goradd/goradd/pkg/generic"
 	"github.com/goradd/goradd/pkg/i18n"
 	strings2 "github.com/goradd/goradd/pkg/strings"
 	"github.com/goradd/html5tag"

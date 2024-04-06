@@ -1,0 +1,18 @@
+// editCreator.tmpl
+
+{{
+
+type {{t.GoName}}EditPanelCreator struct {
+	ID string
+}
+
+func (c {{t.GoName}}EditPanelCreator) Create(ctx context.Context, parent page.ControlI) page.ControlI {
+	p := New{{panelName}}(ctx, parent, c.ID)
+	return p
+}
+
+func Get{{= panelName }}(c page.ControlI, id string) *{{= panelName }} {
+	return c.Page().GetControl(id).(*{{= panelName }})
+}
+
+}}

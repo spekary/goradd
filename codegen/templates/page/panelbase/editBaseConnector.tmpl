@@ -8,7 +8,7 @@ for _,col := range t.Columns {
     if cd.Generator != nil {
         sRefresh := cd.Generator.GenerateRefresh(col, cd)
         sUpdate := cd.Generator.GenerateUpdate(col, cd)
-        sModifies := cd.Generator.GenerateModifies(col, cd)
+        sModifies := cd.Generator.GenerateChanged(col, cd)
 
 {{
 
@@ -40,7 +40,7 @@ func (c {{= cd.Connector }}) Update(i page.ControlI, data interface{}) {
 {{else}}
 
 {{if col.IsNullable && col.IsReference()}}
-        if any.IsZero(val) {
+        if generic.IsZero(val) {
             data.(*model.{{= t.GoName }}).Set{{= col.GoName }}ToNull()
         } else {
             data.(*model.{{= t.GoName }}).Set{{= col.GoName }}(val)
@@ -102,7 +102,7 @@ for _,rr := range t.ReverseReferences {
     if cd.Generator != nil {
         sRefresh := cd.Generator.GenerateRefresh(rr, cd)
         sUpdate := cd.Generator.GenerateUpdate(rr, cd)
-        sModifies := cd.Generator.GenerateModifies(rr, cd)
+        sModifies := cd.Generator.GenerateChanged(rr, cd)
 
 {{
 type {{= cd.Connector }}  struct {
@@ -179,7 +179,7 @@ for _,mm := range t.ManyManyReferences {
     if cd.Generator != nil {
         sRefresh := cd.Generator.GenerateRefresh(mm, cd)
         sUpdate := cd.Generator.GenerateUpdate(mm, cd)
-        sModifies := cd.Generator.GenerateModifies(mm, cd)
+        sModifies := cd.Generator.GenerateChanged(mm, cd)
 
 {{
 type {{= cd.Connector }}  struct {

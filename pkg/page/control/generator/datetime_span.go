@@ -31,12 +31,11 @@ func (d DateTimeSpan) GenerateCreator(ref interface{}, desc *generator.ControlDe
 	col := ref.(*db.Column)
 	s = fmt.Sprintf(
 		`%s.DateTimeSpanCreator{
-	ID:        p.ID() + "-%s",
+			ID:        p.ID() + "-" + %s,
 	ControlOptions: page.ControlOptions{
 		IsDisabled:	   %#v,
-		DataConnector: %s{},
 	},
-}`, desc.Package, desc.ControlID, col.IsPk, desc.Connector)
+}`, desc.Package, desc.ControlIDConst(), col.IsPk)
 	return
 }
 
@@ -48,6 +47,6 @@ func (d DateTimeSpan) GenerateUpdate(ref interface{}, desc *generator.ControlDes
 	return ""
 }
 
-func (d DateTimeSpan) GenerateModifies(ref interface{}, desc *generator.ControlDescription) (s string) {
+func (d DateTimeSpan) GenerateChanged(ref interface{}, desc *generator.ControlDescription) (s string) {
 	return ""
 }

@@ -24,11 +24,8 @@ func (d Panel) SupportsColumn(ref interface{}) bool {
 func (d Panel) GenerateCreator(ref interface{}, desc *generator.ControlDescription) (s string) {
 	s = fmt.Sprintf(
 		`%s.PanelCreator{
-	ID:        p.ID() + "-%s",
-	ControlOptions: page.ControlOptions{
-		DataConnector: %s{},
-	},
-}`, desc.Package, desc.ControlID, desc.Connector)
+			ID:        p.ID() + "-" + %s,
+}`, desc.Package, desc.ControlIDConst())
 	return
 }
 
@@ -40,6 +37,6 @@ func (d Panel) GenerateUpdate(ref interface{}, desc *generator.ControlDescriptio
 	return ""
 }
 
-func (d Panel) GenerateModifies(ref interface{}, desc *generator.ControlDescription) (s string) {
+func (d Panel) GenerateChanged(ref interface{}, desc *generator.ControlDescription) (s string) {
 	return ""
 }

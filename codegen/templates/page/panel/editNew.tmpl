@@ -1,0 +1,19 @@
+// editNew.tmpl
+
+{{
+
+// New{{= panelName }} creates a new edit panel for {{= t.GoName }} objects.
+func New{{= panelName }}(ctx context.Context, parent page.ControlI, id string) *{{= panelName}} {
+    p := new({{= panelName }})
+	p.Init(p, ctx, parent, id)
+	return p
+}
+
+// Init initializes a panel.
+func (p *{{= panelName }}) Init(self any, ctx context.Context, parent page.ControlI, id string) {
+    p.Panel.Init(self, parent, id)
+	p.CreateControls(ctx)
+}
+
+}}
+

@@ -58,6 +58,7 @@ func matchColumnsWithControls(database db.DatabaseI, t *db.Table, descriptions m
 				DefaultLabel: defaultLabel,
 				Generator:    generator,
 				Connector:    t.GoName + controlName + "Connector",
+				ObjectName:   t.GoName,
 			}
 			descriptions[col] = &cd
 		}
@@ -127,6 +128,7 @@ func matchReverseReferencesWithControls(t *db.Table, descriptions map[interface{
 				DefaultLabel: defaultLabel,
 				Generator:    generator,
 				Connector:    t.GoName + controlName + "Connector",
+				ObjectName:   t.GoName,
 			}
 			descriptions[rr] = &cd
 		}
@@ -168,6 +170,7 @@ func matchManyManyReferencesWithControls(t *db.Table, descriptions map[interface
 				DefaultLabel: defaultLabel,
 				Generator:    generator,
 				Connector:    t.GoName + controlName + "Connector",
+				ObjectName:   t.GoName,
 			}
 			descriptions[mm] = &cd
 		}

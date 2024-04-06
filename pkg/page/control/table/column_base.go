@@ -3,7 +3,7 @@ package table
 import (
 	"context"
 	"fmt"
-	"github.com/goradd/goradd/pkg/any"
+	"github.com/goradd/goradd/pkg/generic"
 	"github.com/goradd/goradd/pkg/page/action"
 	"github.com/goradd/goradd/pkg/page/event"
 	time2 "github.com/goradd/goradd/pkg/time"
@@ -771,8 +771,8 @@ func (c *ColumnBase) ApplyFormat(data interface{}) string {
 		if format == "" {
 			format = `%v`
 		}
-		if any.IsSlice(d) {
-			s := any.InterfaceSlice(d)
+		if generic.IsSlice(d) {
+			s := generic.InterfaceSlice(d)
 			var items []string
 			for _, i := range s {
 				items = append(items, fmt.Sprintf(format, i))

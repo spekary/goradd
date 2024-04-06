@@ -1,0 +1,46 @@
+// editSerialize.tmpl
+
+{{
+// Serialize encodes the control to save it during the page serialization process.
+func (p *{{= panelName }}) Serialize(e page.Encoder) {
+	p.Panel.Serialize(e)
+
+    if p.{{= t.GoName }} == nil {
+        if err := e.Encode(false); err != nil {
+            panic(err)
+        }
+    } else {
+        if err := e.Encode(true); err != nil {
+            panic(err)
+        }
+        if err := e.Encode(p.{{= t.GoName }}); err != nil {
+            panic(err)
+        }
+    }
+
+    /*
+    If you add additional non-exported members to the struct (as in, their names start with a lower-case letter),
+    you should serialize them and deserialize them here.
+    Pointers will need to be checked for nil before serializing.
+    Errors should panic.
+    Don't forget to also Deserialize them below.
+    */
+}
+
+// Deserialize decodes the panel and prepares it for use.
+func (p *{{= panelName }}) Deserialize(dec page.Decoder) {
+	p.Panel.Deserialize(dec)
+
+    var isPtr bool
+	if err := dec.Decode(&isPtr); err != nil {
+		panic(err)
+	}
+	if isPtr {
+        if err := dec.Decode(&p.{{= t.GoName }}); err != nil {
+            panic(err)
+        }
+	}
+	return
+}
+
+}}

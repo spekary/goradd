@@ -29,12 +29,11 @@ func (d PhoneTextbox) GenerateCreator(ref interface{}, desc *generator.ControlDe
 	col := ref.(*db.Column)
 	s = fmt.Sprintf(
 		`%s.PhoneTextboxCreator{
-	ID:        p.ID() + "-%s",
+			ID:        p.ID() + "-" + %s,
 	ControlOptions: page.ControlOptions{
 		IsRequired:      %#v,
-		DataConnector: %s{},
 	},
-}`, desc.Package, desc.ControlID, !col.IsNullable, desc.Connector)
+}`, desc.Package, desc.ControlIDConst(), !col.IsNullable)
 	return
 }
 
@@ -46,6 +45,6 @@ func (d PhoneTextbox) GenerateUpdate(ref interface{}, desc *generator.ControlDes
 	return `val := ctrl.Text()`
 }
 
-func (d PhoneTextbox) GenerateModifies(ref interface{}, desc *generator.ControlDescription) (s string) {
+func (d PhoneTextbox) GenerateChanged(ref interface{}, desc *generator.ControlDescription) (s string) {
 	return `val != ctrl.Value()`
 }

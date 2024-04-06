@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/goradd/gofile/pkg/sys"
-	"github.com/goradd/goradd/pkg/config"
 	"github.com/goradd/goradd/pkg/orm/db"
 	"github.com/goradd/goradd/pkg/stringmap"
 	"github.com/goradd/goradd/pkg/strings"
@@ -61,13 +60,14 @@ type ControlDescription struct {
 	DefaultLabel string
 	Generator    ControlGenerator
 	Connector    string
+	ObjectName   string
 }
 
 func (cd *ControlDescription) ControlIDConst() string {
 	if cd.ControlID == "" {
 		return ""
 	}
-	return strings.KebabToCamel(cd.ControlID) + "Id"
+	return cd.ObjectName + strings.KebabToCamel(cd.ControlID) + "Id"
 }
 
 func (t *TableType) GetColumnByDbName(name string) *db.Column {
@@ -373,13 +373,13 @@ func (c *CodeGenerator) ObjectPackage(imp string) string {
 // WrapFormField returns a creator template for a field wrapper with type wrapperType.
 //
 // child should be the creator template for the control that will be wrapped.
-func (c *CodeGenerator) WrapFormField(wrapperType string, label string, forId string, child string) string {
+func (c *CodeGenerator) WrapFormField(wrapperType string, label string, forIdConst string, child string) string {
 	return fmt.Sprintf(
 		`%sCreator{
-	ID: p.ID() + "-%s%s",
-	For:  p.ID() + "-%s",
+	ID: p.ID() + "-" + %s + config.DefaultFormFieldWrapperIdSuffix,
+	For:  p.ID() + "-" + %s,
 	Label: "%s",
 	Child: %s,
 }
-`, wrapperType, forId, config.DefaultFormFieldWrapperIdSuffix, forId, label, child)
+`, wrapperType, forIdConst, forIdConst, label, child)
 }

@@ -1,0 +1,60 @@
+// editValidate.tmpl
+
+{{
+
+// Validate validates the user's input.
+func (p *{{= panelName }}) Validate(ctx context.Context) bool {
+	isValid := p.Panel.Validate(ctx)
+
+{{g
+    if t.Indexes != nil {
+        for _,idx := range t.Indexes {
+            if idx.IsUnique {
+                var names string
+
+                updateable := false
+                for _,col := range idx.Columns {
+                    names += col.GoName
+                    cd := t.ControlDescription(col)
+                    updateable = updateable || (cd.Generator.GenerateUpdate(col,cd) != "")
+                }
+
+                if !updateable {
+                    continue // the controls for this index are all display only, so nothing to validate
+                }
+
+                // Note: we are not dealing with the situation where one of the controls is editable, and another is not
+                // You will need to override this method if that is an issue.
+
+{{
+    if {{join idx.Columns,","}}ctrl{{i _i+1}}{{join}} := {{join idx.Columns,","}}p.{{= t.ControlDescription(_j).ControlName }}(){{join}}; {{join idx.Columns, "&& "}}ctrl{{i _i+1}} != nil {{join}}{
+        {{for i,col := range idx.Columns}}
+        val{{i i+1 }} := ctrl{{i i+1}}.Value().({{= col.ColumnType.GoType() }})
+        {{for}}
+        changed := !p.IsEditing()
+        {{for i,col := range idx.Columns}}
+        changed = changed || val{{i i+1 }} != p.{{= t.GoName }}.{{= col.GoName}}()
+        {{for}}
+        if changed {
+            exists := model.Has{{t.GoName}}By{{= names}}(ctx, {{join idx.Columns, ","}}val{{i _i+1}}{{join}})
+            if exists {
+                isValid = false
+    {{for i,_ := range idx.Columns}}
+                ctrl{{i i+1}}.SetValidationError(p.GT("This value is already in use, please choose a different one."))
+    {{for}}
+            }
+        }
+    }
+}}
+
+            }
+        }
+    }
+}}
+
+    // Add additional validations here
+
+    return isValid
+}
+
+}}

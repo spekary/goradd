@@ -18,7 +18,7 @@ type SelectList struct {
 func (d SelectList) Imports() []string {
 	return []string{
 		"strconv",
-		"github.com/goradd/goradd/pkg/any",
+		"github.com/goradd/goradd/pkg/generic",
 	}
 }
 
@@ -33,13 +33,12 @@ func (d SelectList) GenerateCreator(ref interface{}, desc *generator.ControlDesc
 	col := ref.(*db.Column)
 	s = fmt.Sprintf(
 		`%s.SelectListCreator{
-	ID:           p.ID() + "-%s",
+			ID:        p.ID() + "-" + %s,
 	DataProvider: p,
 	ControlOptions: page.ControlOptions{
 		IsRequired:      %#v,
-		DataConnector: %s{},
 	},
-}`, desc.Package, desc.ControlID, !col.IsNullable, desc.Connector)
+}`, desc.Package, desc.ControlIDConst(), !col.IsNullable)
 	return
 }
 
@@ -84,15 +83,15 @@ func (d SelectList) GenerateUpdate(ref interface{}, desc *generator.ControlDescr
 	return s
 }
 
-func (d SelectList) GenerateModifies(ref interface{}, desc *generator.ControlDescription) string {
+func (d SelectList) GenerateChanged(ref interface{}, desc *generator.ControlDescription) string {
 	return `val != ctrl.Value()`
 }
 
 func (d SelectList) GenerateProvider(ref interface{}, desc *generator.ControlDescription) string {
 	col := ref.(*db.Column)
 	if col.ForeignKey.IsEnum {
-		return fmt.Sprintf(`return model.All%sI()`, col.ForeignKey.GoTypePlural)
+		return fmt.Sprintf(`model.All%sI()`, col.ForeignKey.GoTypePlural)
 	} else {
-		return fmt.Sprintf(`return model.Query%s(ctx).LoadI()`, col.ForeignKey.GoTypePlural)
+		return fmt.Sprintf(`model.Query%s(ctx).LoadI()`, col.ForeignKey.GoTypePlural)
 	}
 }

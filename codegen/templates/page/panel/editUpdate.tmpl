@@ -1,0 +1,50 @@
+// editUpdate.tmpl
+
+{{
+
+// Update loads the cached {{= t.GoName }} object with data from the controls.
+func (p *{{= panelName }}) Update() {
+{{for _,dbRef := range dbRefs}}
+{{g
+    cd := t.ControlDescription(dbRef)
+    if cd == nil || cd.Generator == nil {continue}
+    valString := cd.Generator.GenerateUpdate(dbRef, cd)
+    if valString == "" {continue}
+    var updateString string
+
+    switch ref := dbRef.(type) {
+    case *db.Column:
+        if ref.IsEnum() {
+            updateString = fmt.Sprintf(`p.%s.Set%s(model.%s(val))`, t.GoName, ref.ReferenceFunction(), ref.ForeignKey.GoType)
+        } else {
+            if ref.IsNullable && ref.IsReference() {
+                updateString = fmt.Sprintf(`
+                    if generic.IsZero(val) {
+                        p.%s.Set%sToNull()
+                    } else {
+                        p.%s.Set%s(val)
+                    }
+            `, t.GoName, ref.GoName, t.GoName, ref.GoName)
+            } else {
+                updateString = fmt.Sprintf(`p.%s.Set%s(val)`, t.GoName, ref.GoName)
+            }
+        }
+    case *db.ReverseReference:
+        updateString = fmt.Sprintf(`p.%s.Set%sPrimaryKeys(val)`, t.GoName, ref.GoName)
+
+    case *db.ManyManyReference:
+        if ref.IsEnumAssociation {
+            updateString = fmt.Sprintf(`p.%s.Set%s(val)`, t.GoName, ref.GoPlural)
+        } else {
+            updateString = fmt.Sprintf(`p.%s.Set%sPrimaryKeys(val)`, t.GoName, ref.GoName)
+        }
+    }
+}}
+    if ctrl := p.{{= cd.ControlName }}(); p != nil {
+        {{= valString }}
+        {{= updateString }}
+    }
+{{for}}
+}
+
+}}

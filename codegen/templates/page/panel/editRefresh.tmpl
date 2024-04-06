@@ -1,0 +1,39 @@
+// editRefresh.tmpl
+
+{{
+
+// Refresh loads the controls with data from the cached {{= t.GoName }} object.
+func (p *{{= panelName }}) Refresh() {
+{{for _,dbRef := range dbRefs}}
+{{g
+    cd := t.ControlDescription(dbRef)
+    if cd == nil || cd.Generator == nil {continue}
+    refreshString := cd.Generator.GenerateRefresh(dbRef, cd)
+    if refreshString == "" {continue}
+    var valString string
+
+    switch ref := dbRef.(type) {
+    case *db.Column:
+        if ref.IsEnum() {
+            valString = `p.` + t.GoName + "." + ref.ReferenceFunction() + "().ID()"
+        } else {
+            valString = `p.` + t.GoName + "." + ref.GoName + "()"
+        }
+    case *db.ReverseReference:
+        if ref.IsUnique() {
+            valString = `p.` + t.GoName + "." + ref.GoName + "()"
+        } else {
+            valString = `p.` + t.GoName + "." + ref.GoPlural + "()"
+        }
+    case *db.ManyManyReference:
+        valString = `p.` + t.GoName + "." + ref.GoPlural + "()"
+    }
+}}
+    if ctrl := p.{{= cd.ControlName }}(); p != nil {
+        val := {{= valString }}
+        {{= refreshString }}
+    }
+{{for}}
+}
+
+}}
