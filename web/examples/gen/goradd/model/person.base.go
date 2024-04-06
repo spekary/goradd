@@ -1133,6 +1133,11 @@ func (o *personBase) update(ctx context.Context) {
 					Where(In(node.Project().PrimaryKeyNode(), o.sProjectsAsManagerPKs...)).
 					Select(node.Project().ManagerID()).
 					Load()
+
+				if o.mProjectsAsManager == nil {
+					o.mProjectsAsManager = make(map[string]*Project)
+				}
+
 				for _, obj := range objs {
 					if _, ok := o.mProjectsAsManager[obj.PrimaryKey()]; !ok {
 						o.mProjectsAsManager[obj.PrimaryKey()] = obj
