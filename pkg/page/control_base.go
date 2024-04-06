@@ -336,6 +336,7 @@ type ControlBase struct {
 	encoded bool
 
 	// dataConnector automates the transfer of data between a data store and the control.
+	// Deprecated: Not used by the code generator.
 	dataConnector DataConnector
 
 	// watchedKeys are the notification keys that will cause the control to refresh.
@@ -1713,11 +1714,13 @@ func (c *ControlBase) SetWillBeValidated(v bool) {
 }
 
 // DataConnector returns the control's data connector if one has been set.
+// Deprecated: Not used by the code generator.
 func (c *ControlBase) DataConnector() DataConnector {
 	return c.dataConnector
 }
 
 // SetDataConnector sets the data connector. The connector must be registered with Gob to be serializable.
+// Deprecated: Not used by the code generator.
 func (c *ControlBase) SetDataConnector(d DataConnector) ControlI {
 	c.dataConnector = d
 	return c.this()
@@ -1725,6 +1728,7 @@ func (c *ControlBase) SetDataConnector(d DataConnector) ControlI {
 
 // RefreshData is called by forms to tell controls to set their appearance based on the data provided.
 // The default calls the data connector to do this.
+// Deprecated: Not used by the code generator.
 func (c *ControlBase) RefreshData(data interface{}) {
 	if c.dataConnector != nil {
 		c.dataConnector.Refresh(c.this(), data)
@@ -1733,6 +1737,7 @@ func (c *ControlBase) RefreshData(data interface{}) {
 
 // UpdateData is called by forms to tell controls to put the control value into the provided data object.
 // The default calls the data connector to do this.
+// Deprecated: Not used by the code generator.
 func (c *ControlBase) UpdateData(data interface{}) {
 	if c.dataConnector != nil && c.IsOnPage() {
 		c.dataConnector.Update(c.this(), data)
@@ -1742,6 +1747,7 @@ func (c *ControlBase) UpdateData(data interface{}) {
 // ModifiesData is called by forms to determine if the control has been changed such that it will modify its
 // corresponding data when UpdateData is called.
 // The default calls the data connector to do this.
+// Deprecated: Not used by the code generator.
 func (c *ControlBase) ModifiesData(data interface{}) bool {
 	if c.dataConnector != nil && c.IsOnPage() {
 		return c.dataConnector.Modifies(c.this(), data)
