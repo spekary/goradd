@@ -93,7 +93,6 @@ The gen directory is organized as follows:
     * form
     * model
       * node
-    * panelbase
 
 <dl>
   <dt>model</dt>
@@ -105,8 +104,6 @@ The gen directory is organized as follows:
       goradd-project/web/form directory and modified there. This directory also includes 
       panels that help in the process of listing and editing objects (rows) in the database tables.
       To use them, copy them to your goradd-project/web/panels directory.</dd>
-  <dd>panelbase contains code that the panel objects rely on. They should be used in place. They
-      are regenerated every time the code generator is run.</dd>
 
 </dl>
 
