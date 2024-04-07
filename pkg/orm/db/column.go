@@ -16,15 +16,15 @@ const (
 // different record types. Some information is filled in after analysis. Some information can be
 // provided through information embedded in database comments.
 type Column struct {
-	// DbName is the name of the column in the database. This is blank if this is a "virtual" table for sql tables like an association or virtual attribute query.
+	// DbName is the name of the column in the database.
+	// Database names are lower snake case. i.e. manager_id.
 	DbName string
-	// GoName is the name of the column in go code
+	// GoName is the name of the column in go code.
+	// Go names are camel case. i.e. ManagerID.
 	GoName string
-	// NativeType is the type of the column as described by the database itself.
-	NativeType string
 	//  ColumnType is the equivalent Go type to the database column
 	ColumnType GoColumnType
-	// MaxCharLength is the maximum length of characters to allow in the column if a string type column.
+	// MaxCharLength is the maximum length of bytes to allow in the column if a string or byte[] type column.
 	// If the database has the ability to specify this, this will correspond to what is specified.
 	// In any case, we will generate code to prevent fields from getting bigger than this.
 	MaxCharLength uint64

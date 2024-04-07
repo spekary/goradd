@@ -437,7 +437,6 @@ func (m *Model) importColumn(desc ColumnDescription) *Column {
 	c := &Column{
 		DbName:        desc.Name,
 		GoName:        m.dbNameToGoName(desc.Name),
-		NativeType:    desc.NativeType,
 		ColumnType:    ColTypeFromGoTypeString(desc.GoType),
 		MaxCharLength: desc.MaxCharLength,
 		DefaultValue:  desc.DefaultValue,

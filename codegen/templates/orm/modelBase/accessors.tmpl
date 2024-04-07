@@ -118,6 +118,12 @@ func (o *{{privateName}}Base) Load{{= col.ForeignKey.GoName }}(ctx context.Conte
 // To prevent this, pass a copy of the byte array.
 {{if}}
 func (o *{{privateName}}Base) Set{{= col.GoName }}(v {{= col.ColumnType.GoType() }}) {
+{{if col.MaxCharLength > 0 && col.ForeignKey == nil && !col.IsPk && (col.ColumnType == query.ColTypeBytes || col.ColumnType == query.ColTypeString) }}
+    if len(v) > {{= t.GoName }}{{= col.GoName }}MaxLength {
+        panic ("called Set{{= col.GoName }} with a value that is too long")
+    }
+{{if}}
+
 	o.{{= col.ModelName() }}IsValid = true
 {{if col.ColumnType == query.ColTypeBytes}}
 	o.{{= col.ModelName() }} = v
