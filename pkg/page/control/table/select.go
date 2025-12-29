@@ -3,6 +3,8 @@ package table
 import (
 	"context"
 	"fmt"
+	"path"
+
 	"github.com/goradd/goradd/pkg/config"
 	"github.com/goradd/goradd/pkg/page"
 	"github.com/goradd/goradd/pkg/page/action"
@@ -11,7 +13,6 @@ import (
 	"github.com/goradd/goradd/pkg/page/event"
 	"github.com/goradd/html5tag"
 	"github.com/goradd/maps"
-	"path"
 )
 
 // PrimaryKeyer is an interface that is often implemented by model objects.
@@ -34,11 +35,16 @@ type SelectTable struct {
 }
 
 // RowSelectedEvent is an event that indicates a row was selected on a SelectTable.
+// Rows can be selected by being clicked on or highlighted using arrow keys.
 func RowSelectedEvent() *event.Event {
 	return event.NewEvent("gr-rowselected")
 }
 
-// NewSelectTable creates a new SelectTable, which is a table with clickable rows.
+// NewSelectTable creates a new SelectTable, which is a table with selectable rows.
+// To detect row selection that uses arrow keys or clicking on a row, respond to the RowSelectedEvent.
+// If selecting a row with arrow keys should not be the same as clicking on a row, then instead
+// respond to the ClickEvent event, and possible the EnterKeyEvent if you want enter to trigger an action
+// of the currently selected row.
 func NewSelectTable(parent page.ControlI, id string) *SelectTable {
 	t := new(SelectTable)
 	t.Init(t, parent, id)
@@ -47,7 +53,6 @@ func NewSelectTable(parent page.ControlI, id string) *SelectTable {
 
 func (t *SelectTable) Init(self any, parent page.ControlI, id string) {
 	t.Table.Init(self, parent, id)
-	t.ParentForm().AddJavaScriptFile(path.Join(config.AssetPrefix, "goradd", "/js/goradd-scrollIntoView.js"), false, nil)
 	t.ParentForm().AddJavaScriptFile(path.Join(config.AssetPrefix, "goradd", "/js/table-select.js"), false, nil)
 	t.SetAttribute("tabindex", 0) // Make the entire table focusable and selectable. This can be overridden later if needed.
 	t.AddClass("gr-clickable-rows")
@@ -147,7 +152,8 @@ func (t *SelectTable) MarshalState(m page.SavedState) {
 func (t *SelectTable) UnmarshalState(m page.SavedState) {
 	if v, ok := m.Load("selId"); ok {
 		if id, ok2 := v.(string); ok2 {
-			t.selectedID = id
+			// Make sure we scroll to the item in javascript
+			t.SetSelectedID(id)
 		}
 	}
 }
@@ -209,6 +215,8 @@ type SelectTableCreator struct {
 	Sortable bool
 	// SortHistoryLimit will set how many columns deep we will remember the sorting for multi-level sorts
 	SortHistoryLimit int
+	// SortColumnIDs is a list of column ids that will be used to specify the initial sort order
+	SortColumnIDs []string
 	page.ControlOptions
 	// OnRowSelected is the action to take when the row is selected
 	OnRowSelected action.ActionI
@@ -245,6 +253,7 @@ func (c SelectTableCreator) Init(ctx context.Context, ctrl SelectTableI) {
 		Data:             c.Data,
 		Sortable:         c.Sortable,
 		SortHistoryLimit: c.SortHistoryLimit,
+		SortColumnIDs:    c.SortColumnIDs,
 		ControlOptions:   c.ControlOptions,
 	}
 	sub.Init(ctx, ctrl)

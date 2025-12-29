@@ -27,7 +27,7 @@ func (o *{{privateName}}Base) update(ctx context.Context) {
             oName := oRef(col)
 
 }}
-        if o.{{= oName }} != nil {
+        if o.{{= oName }} != nil && o.{{= oName }}.IsDirty() {
             o.{{= oName }}.Save(ctx)
             id := o.{{= oName }}.PrimaryKey()
             o.Set{{= col.GoName }}(id)

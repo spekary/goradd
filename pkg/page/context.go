@@ -12,11 +12,13 @@ import (
 	"github.com/goradd/goradd/pkg/page/action"
 	"github.com/goradd/goradd/pkg/page/event"
 	"github.com/goradd/goradd/pkg/session"
+	time2 "github.com/goradd/goradd/pkg/time"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // RequestMode tracks what kind of request we are processing.
@@ -362,6 +364,16 @@ func (ctx *Context) ClientTimezoneOffset() int {
 // ClientTimezone returns the name of the timezone of the client, if available.
 func (ctx *Context) ClientTimezone() string {
 	return ctx.clientTimezone
+}
+
+// ClientTimeAdjust converts the given time to client time .
+func (ctx *Context) ClientTimeAdjust(t time.Time) time.Time {
+	return time2.AtGMTOffset(t, ctx.ClientTimezoneOffset())
+}
+
+// Now returns the current time in the client timezone.
+func (ctx *Context) Now() time.Time {
+	return time2.AtGMTOffset(time.Now(), ctx.ClientTimezoneOffset())
 }
 
 // HasTimezoneInfo returns true if timezone info is valid.

@@ -4,6 +4,10 @@ import (
 	"context"
 	"encoding/gob"
 	"fmt"
+	gohtml "html"
+	"io"
+	"reflect"
+
 	"github.com/goradd/goradd/pkg/base"
 	"github.com/goradd/goradd/pkg/config"
 	"github.com/goradd/goradd/pkg/i18n"
@@ -18,9 +22,6 @@ import (
 	"github.com/goradd/goradd/pkg/watcher"
 	"github.com/goradd/html5tag"
 	"github.com/goradd/maps"
-	gohtml "html"
-	"io"
-	"reflect"
 )
 
 const sessionControlStates string = "goradd.controlStates"
@@ -1122,7 +1123,7 @@ func (c *ControlBase) Event(eventName string) *event.Event {
 
 // SetActionValue sets a value that is provided to actions when they are triggered. The value can be a static value
 // or one of the javascript.* objects that can dynamically generate values. The value is then sent back to the Action
-// function after the action is triggered as the ControlActionValue in the action.Params struct.
+// function after the action is triggered as the ControlValue in the action.Params struct.
 func (c *ControlBase) SetActionValue(v interface{}) ControlI {
 	c.actionValue = v
 	return c.this()

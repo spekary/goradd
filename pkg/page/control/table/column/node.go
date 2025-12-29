@@ -2,18 +2,23 @@ package column
 
 import (
 	"context"
+
 	"github.com/goradd/goradd/pkg/page/control/table"
+	"github.com/goradd/goradd/pkg/strings"
 
 	"github.com/goradd/goradd/pkg/any"
 	"github.com/goradd/goradd/pkg/orm/query"
 	"github.com/goradd/goradd/pkg/page"
 )
 
+type TF [2]string
+
 // NodeColumn is a column that uses a query.NodeI to get its text out of data that is coming from the ORM.
 // Create it with NewNodeColumn
 type NodeColumn struct {
 	table.ColumnBase
-	node query.NodeI
+	node      query.NodeI
+	trueFalse TF
 }
 
 // NewNodeColumn creates a table column that uses a query.NodeI object to get its text out of an ORM object.
@@ -34,8 +39,20 @@ func (c *NodeColumn) Init(node query.NodeI) {
 	c.SetTitle(query.NodeGoName(node))
 }
 
-func (c *NodeColumn) GetNode() query.NodeI {
-	return c.node
+// SetTrueFalse sets the strings to be displayed on true and false.
+func (c *NodeColumn) SetTrueFalse(t string, f string) {
+	c.trueFalse[0] = t
+	c.trueFalse[1] = f
+}
+
+// SortNodes returns the nodes used to sort the column.
+// By default, this is the node used to display the information in the column,
+// but that can be overridden through SetSortNodes.
+func (c *NodeColumn) SortNodes() []query.NodeI {
+	if n := c.ColumnBase.SortNodes(); n != nil {
+		return n
+	}
+	return []query.NodeI{c.node}
 }
 
 func (c *NodeColumn) CellData(_ context.Context, _ int, _ int, data interface{}) interface{} {
@@ -73,6 +90,10 @@ func (c *NodeColumn) CellData(_ context.Context, _ int, _ int, data interface{})
 			}
 		}
 		s := v2.Get(names[0]) // This should be a column node
+
+		if b, ok := s.(bool); ok && c.trueFalse[0] != "" || c.trueFalse[1] != "" {
+			s = strings.If(b, c.trueFalse[0], c.trueFalse[1])
+		}
 		return s
 	}
 }
@@ -92,20 +113,12 @@ func (c *NodeColumn) Deserialize(dec page.Decoder) {
 	}
 }
 
-type NodeGetter interface {
-	GetNode() query.NodeI
-}
-
-// MakeNodeSlice is a convenience method to convert a slice of columns into a slice of nodes derived from
-// those columns. The column slice would typically come from the table's SortColumns method, and the returned
-// slice would be passed to the database's OrderBy clause when building a query. Since this is a common use, it
-// will also add sort info to the nodes.
-func MakeNodeSlice(columns []table.ColumnI) []query.NodeI {
-	var nodes []query.NodeI
+// SortNodes returns the current list of nodes in sort order that correspond to the
+// user's sort selection.
+func SortNodes(columns []table.ColumnI) (nodes []query.NodeI) {
 	for _, c := range columns {
-		if getter, ok := c.(NodeGetter); ok {
-			node := getter.GetNode()
-			if node != nil {
+		if nodes2 := c.SortNodes(); nodes2 != nil {
+			for _, node := range nodes2 {
 				if nodeSorter, ok2 := node.(query.NodeSorter); ok2 {
 					switch c.SortDirection() {
 					case table.SortAscending:
@@ -115,11 +128,9 @@ func MakeNodeSlice(columns []table.ColumnI) []query.NodeI {
 					}
 				}
 				nodes = append(nodes, node)
-			} else {
-				panic("Column does not have a sort node.")
 			}
 		} else {
-			panic("Column is not a NodeGetter.")
+			panic("Column does not have a sort node.")
 		}
 	}
 	return nodes
@@ -140,7 +151,9 @@ type NodeColumnCreator struct {
 	// SortDirection sets the initial sorting direction of the column, and will make the column sortable
 	// By default, the column is not sortable.
 	SortDirection table.SortDirection
-	// IsHtml indicates that the texter is producing HTML rather than text that should be escaped.
+	// For boolean nodes, this represents the strings that will be displayed for true and false.
+	// If not set, the words "true" and "false" will be displayed.
+	TrueFalse TF
 	table.ColumnOptions
 }
 
@@ -156,6 +169,9 @@ func (c NodeColumnCreator) Create(ctx context.Context, parent table.TableI) tabl
 	if c.SortDirection != table.NotSortable {
 		col.SetSortDirection(c.SortDirection)
 	}
+	col.trueFalse[0] = c.TrueFalse[0]
+	col.trueFalse[1] = c.TrueFalse[1]
+
 	col.ApplyOptions(ctx, parent, c.ColumnOptions)
 	return col
 }

@@ -12,7 +12,7 @@
             };
             options = goradd.extendOptions(optionDefaults, options);
             this._super(element, options);
-            this.on('click', 'tr', this._handleRowClick, {bubbles: true});
+            this.on('click', 'tbody > tr', this._handleRowClick, {bubbles: true});
             this._initSelectedId();
             if (this.options.scrollable) {
                 var scroller = goradd.tagBuilder("div")
@@ -45,7 +45,6 @@
                 goradd.setControlValue(this.element.id, "selectedId", selId);
                 this.trigger('gr-rowselected', selId);
             }
-            event.preventDefault();
         },
         _handleKeyDown: function(e) {
             var row;
@@ -114,7 +113,7 @@
             }
         },
         _setOption: function(key, value) {
-            this._super._setOption(key, value);
+            //this._super._setOption(key, value);
             if (key === "selectedId") {
                 this._initSelectedId();
             }
@@ -125,7 +124,7 @@
             }
             var row = this.qs("tr[data-id='" + this.options.selectedId + "']");
             if (row) {
-                g$(row).scrollIntoView();
+                row.scrollIntoView();
             }
         }
 

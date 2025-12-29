@@ -150,7 +150,7 @@ func (p *Proxy) TagHtml(label string,
 }
 
 // ButtonHtml outputs the proxy as a button tag.
-// actionValue becomes the event's ControlValue parameter
+// actionValue becomes the event's ControlValue parameter.
 func (p *Proxy) ButtonHtml(label string,
 	actionValue string,
 	attributes html5tag.Attributes,
@@ -158,7 +158,7 @@ func (p *Proxy) ButtonHtml(label string,
 ) string {
 	a := html5tag.NewAttributes()
 	a.Set("onclick", "return false")  // To prevent a return from activating the button
-	a.Set("type", "submit")           // To support non-javascript situations
+	a.Set("type", "button")           // Proxy buttons do not work in non-javascript situations by default
 	a.Set("name", page.HtmlVarAction) // needed for non-javascript posts
 	buttonValue := p.ID() + "_" + actionValue
 	a.Set("value", buttonValue) // needed for non-javascript posts

@@ -60,7 +60,7 @@ func (d *DateTextbox) SetValue(val interface{}) page.ControlI {
 	case string:
 		d.SetText(v)
 	case time.Time:
-		d.SetDate(v.UTC())
+		d.SetDate(v)
 	}
 	return d
 }
@@ -104,7 +104,7 @@ func (d *DateTextbox) SetText(s string) page.ControlI {
 	return d
 }
 
-// SetDate will set the textbox to the give time
+// SetDate will set the textbox to the give time.
 func (d *DateTextbox) SetDate(t time.Time) {
 	s := t.Format(d.layouts()[0])
 	d.Textbox.SetText(s)

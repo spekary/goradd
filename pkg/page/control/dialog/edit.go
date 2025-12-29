@@ -3,6 +3,7 @@ package dialog
 import (
 	"context"
 	"fmt"
+
 	"github.com/goradd/goradd/pkg/page/control"
 
 	"github.com/goradd/goradd/pkg/page"
@@ -37,13 +38,15 @@ type EditPanel struct {
 
 // GetEditPanel creates a panel that is designed to hold an EditablePanel. It itself will be wrapped with
 // the application's default dialog style, and it will automatically get Save, Cancel and Delete buttons.
-func GetEditPanel(parent page.ControlI, id string, objectName string) (*EditPanel, bool) {
+// Returns the dialog panel, and isNew will be true if the panel is newly created, and false if
+// it was already created and was found previously hidden.
+func GetEditPanel(parent page.ControlI, id string, objectName string) (dp *EditPanel, isNew bool) {
 	if parent.Page().HasControl(id) { // dialog has already been created, but is hidden
 		return parent.Page().GetControl(id).(*EditPanel), false
 	}
 
 	dlg := NewDialogI(parent.ParentForm(), id+"-dlg")
-	dp := new(EditPanel)
+	dp = new(EditPanel)
 	dp.Init(dp, dlg, id, objectName)
 	return dp, true
 }

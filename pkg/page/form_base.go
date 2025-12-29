@@ -187,9 +187,7 @@ func (f *FormBase) Draw(ctx context.Context, w io.Writer) {
 	if messageServer.Messenger != nil {
 		s = messageServer.Messenger.JavascriptInit()
 	}
-	f.GetActionScripts(&f.response) // actions assigned to form during form creation
-	s += f.response.JavaScript()
-	f.response = NewResponse() // clear response
+	// call initForm before the action scripts in case the action scripts call into widgets
 	s += "\n" + `goradd.initForm();` + "\n"
 	if !config.Release {
 		// This code registers the form with the test harness. We do not want to do this in release mode since it is a security risk.
@@ -197,6 +195,10 @@ func (f *FormBase) Draw(ctx context.Context, w io.Writer) {
 	} else {
 		s += fmt.Sprintf("goradd.ajaxTimeout = %d;\n", config.AjaxTimeout) // turn on the ajax timeout in release mode
 	}
+
+	f.GetActionScripts(&f.response) // actions assigned to form during form creation
+	s += f.response.JavaScript()
+	f.response = NewResponse() // clear response
 	if _, err := fmt.Fprintf(w, `<script>
 %s
 </script>`, s); err != nil {

@@ -34,8 +34,14 @@ func (c *AliasColumn) Init(alias string) {
 	c.alias = alias
 }
 
-func GetNode(c *AliasColumn) query.NodeI {
-	return query.Alias(c.alias)
+// SortNodes returns the nodes used to sort the column.
+// By default, this is the node used to display the information in the column,
+// but that can be overridden through SetSortNodes.
+func (c *AliasColumn) SortNodes() []query.NodeI {
+	if n := c.ColumnBase.SortNodes(); n != nil {
+		return n
+	}
+	return []query.NodeI{query.Alias(c.alias)}
 }
 
 // CellData is called by the framework to get the data to display in a cell.

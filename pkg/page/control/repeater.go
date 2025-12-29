@@ -160,7 +160,7 @@ type RepeaterCreator struct {
 	DataProvider DataBinder
 	// DataProviderID is the control id of the data binder for the table.
 	DataProviderID string
-	// Data is the actual data for the table, and should be a slice of objects
+	// Data is the actual data for the repeater, and should be a slice of objects
 	Data interface{}
 	page.ControlOptions
 	// PageSize is the number of rows to include in a page

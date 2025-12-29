@@ -89,7 +89,7 @@ func (p *TableDbPanel) BindData(ctx context.Context, s DataManagerI) {
 	// figure out how to sort the columns. This could be a simple process, or complex, depending on your data
 
 	// Since we are asking the database to do the sort, we have to make a slice of nodes
-	sortNodes := column2.MakeNodeSlice(t.SortColumns())
+	sortNodes := column2.SortNodes(t.SortColumns())
 	maxRowCount, offset := t.SqlLimits()
 	people := model.QueryPeople(ctx).
 		Alias("manager_count",

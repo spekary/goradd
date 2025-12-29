@@ -50,6 +50,13 @@ func CellClick() *Event {
 	return e
 }
 
+func CellDoubleClick() *Event {
+	e := DoubleClick().
+		Selector("td").
+		ActionValue(javascript.JsCode(CellClickDefault))
+	return e
+}
+
 // HeaderCellClick responds to clicks on header cells (th)
 func HeaderCellClick() *Event {
 	e := Click().

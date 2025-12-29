@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/goradd/goradd/pkg/any"
+	"github.com/goradd/goradd/pkg/orm/query"
 	"github.com/goradd/goradd/pkg/page/action"
 	"github.com/goradd/goradd/pkg/page/event"
 	time2 "github.com/goradd/goradd/pkg/time"
@@ -78,6 +79,7 @@ type ColumnI interface {
 	SortDirection() SortDirection
 	SetSortDirection(SortDirection) ColumnI
 	SetSortable() ColumnI
+	SortNodes() []query.NodeI
 	RenderSortButton(labelHtml string) string
 	SetIsHtml(columnIsHtml bool) ColumnI
 	PreRender()
@@ -133,6 +135,7 @@ type ColumnBase struct {
 	cellStylerID        string     // for deserialization
 	isHidden            bool
 	sortDirection       SortDirection
+	sortNodes           []query.NodeI
 	// format is a format string. It will be applied using fmt.Sprintf. If you don't provide a Format string, standard
 	// string conversion operations will be used.
 	format string
@@ -447,6 +450,7 @@ func (c *ColumnBase) CellAttributes(ctx context.Context, row int, col int, data 
 // SetSortable indicates that the column should be drawn with sort indicators.
 func (c *ColumnBase) SetSortable() ColumnI {
 	c.sortDirection = NotSorted
+	c.ParentTable().MakeSortable()
 	return c.this()
 }
 
@@ -471,8 +475,8 @@ func (c *ColumnBase) RenderSortButton(labelHtml string) string {
 	labelHtml += ` ` + c.ParentTable().SortIconHtml(c)
 
 	return fmt.Sprintf(
-		`<button class="gr-transparent-btn" onclick="g$('%s').trigger('%s', '%s'); return false;">%s</button>`,
-		c.parentTable.ID(), ColumnSortEventName, c.ID(), labelHtml)
+		`<button class="gr-transparent-btn" data-gr-sort-level="%d"" onclick="g$('%s').trigger('%s', '%s'); return false;">%s</button>`,
+		c.SortLevel(), c.parentTable.ID(), ColumnSortEventName, c.ID(), labelHtml)
 }
 
 // SortDirection returns the current sort direction.
@@ -483,7 +487,36 @@ func (c *ColumnBase) SortDirection() SortDirection {
 // SetSortDirection is used internally to set the sort direction indicator.
 func (c *ColumnBase) SetSortDirection(d SortDirection) ColumnI {
 	c.sortDirection = d
+	if c.ParentTable() != nil {
+		c.ParentTable().MakeSortable()
+	}
 	return c.this()
+}
+
+// SortNodes returns the database nodes that will be used to sort the column.
+func (c *ColumnBase) SortNodes() []query.NodeI {
+	return c.sortNodes
+}
+
+// SetSortNodes will set the sort nodes that the column will use for sorting.
+func (c *ColumnBase) SetSortNodes(s []query.NodeI) {
+	c.sortNodes = s
+	if c.sortDirection == NotSortable {
+		c.SetSortDirection(NotSorted)
+	}
+}
+
+func (c *ColumnBase) SortLevel() int {
+	if c.parentTable == nil {
+		return 0
+	}
+
+	for i, col := range c.parentTable.SortColumns() {
+		if c.ID() == col.ID() {
+			return i + 1
+		}
+	}
+	return 0
 }
 
 // PreRender is called just before the table is redrawn.
@@ -507,6 +540,7 @@ type columnBaseEncoded struct {
 	IsHtml           bool
 	IsHidden         bool
 	SortDirection    SortDirection
+	SortNodes        []query.NodeI
 	CellTexter       interface{}
 	HeaderTexter     interface{}
 	FooterTexter     interface{}
@@ -529,6 +563,7 @@ func (c *ColumnBase) Serialize(e page.Encoder) {
 		IsHtml:           c.isHtml,
 		IsHidden:         c.isHidden,
 		SortDirection:    c.sortDirection,
+		SortNodes:        c.sortNodes,
 		CellTexter:       c.cellTexter,
 		HeaderTexter:     c.headerTexter,
 		FooterTexter:     c.footerTexter,
@@ -573,6 +608,7 @@ func (c *ColumnBase) Deserialize(dec page.Decoder) {
 	c.isHtml = s.IsHtml
 	c.isHidden = s.IsHidden
 	c.sortDirection = s.SortDirection
+	c.sortNodes = s.SortNodes
 	c.format = s.Format
 	c.timeFormat = s.TimeFormat
 
@@ -667,6 +703,9 @@ type ColumnOptions struct {
 	TimeFormat string
 	// ShowLocalTime will convert the time to the client's local time.
 	ShowLocalTime bool
+	// SortNodes are the database nodes that will be used to sort the column in the order they should be used.
+	// If the column has a default node, this will override that column's node.
+	SortNodes []query.NodeI
 }
 
 func (c *ColumnBase) ApplyOptions(ctx context.Context, parent TableI, opt ColumnOptions) {
@@ -720,6 +759,10 @@ func (c *ColumnBase) ApplyOptions(ctx context.Context, parent TableI, opt Column
 		c.SetTimeFormat(opt.TimeFormat)
 	}
 	c.SetShowLocalTime(opt.ShowLocalTime)
+
+	if opt.SortNodes != nil {
+		c.SetSortNodes(opt.SortNodes)
+	}
 }
 
 // ApplyFormat is used by table columns to apply the given fmt.Sprintf and time.Format strings to the data.
@@ -749,6 +792,9 @@ func (c *ColumnBase) ApplyFormat(data interface{}) string {
 		}
 
 	case time.Time:
+		if d.IsZero() {
+			return ""
+		}
 		t := d
 		timeFormat := c.timeFormat
 		if timeFormat == "" {
@@ -778,4 +824,9 @@ func (c *ColumnBase) ApplyFormat(data interface{}) string {
 		}
 	}
 	return out
+}
+
+// NodeList builds a node slice from a list of nodes.
+func NodeList(l ...query.NodeI) []query.NodeI {
+	return l
 }

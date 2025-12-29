@@ -118,8 +118,8 @@ func (l *List) AddItems(items ...interface{}) {
 }
 
 // Private function to add an interface item to the end of the list. Will need to be reindexed eventually.
-func (l *List) addItem(item interface{}) {
-	switch v := item.(type) {
+func (l *List) addItem(i interface{}) {
+	switch v := i.(type) {
 	case *Item:
 		l.items = append(l.items, v)
 	case ValueLabeler:

@@ -71,6 +71,9 @@ func (c TexterColumnCreator) Create(ctx context.Context, parent table.TableI) ta
 	if c.IsHtml {
 		col.SetIsHtml(true)
 	}
+	if c.SortNodes != nil {
+		col.SetSortNodes(c.SortNodes)
+	}
 	col.ApplyOptions(ctx, parent, c.ColumnOptions)
 	return col
 }

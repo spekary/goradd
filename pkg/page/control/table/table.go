@@ -8,11 +8,12 @@ package table
 import (
 	"context"
 	"fmt"
-	control2 "github.com/goradd/goradd/pkg/page/control"
 	"html"
 	"io"
 	"reflect"
 	"strconv"
+
+	control2 "github.com/goradd/goradd/pkg/page/control"
 
 	"github.com/goradd/goradd/pkg/log"
 	"github.com/goradd/goradd/pkg/page"
@@ -62,6 +63,7 @@ type TableI interface {
 	SetSortIconHtml(sortable string, asc string, desc string)
 	DrawRow(ctx context.Context, row int, data interface{}, w io.Writer)
 	SetSortColumnsByID(ids ...string)
+	SortColumns() (ret []ColumnI)
 }
 
 // RowAttributer is used to style particular table rows.
@@ -119,7 +121,7 @@ type Table struct {
 	footerRowStyler       FooterRowAttributer
 	columnIdCounter       int
 
-	// Sort info. Sorting is difficult enough, and intertwined with tables enough, that we just make it built in to every column
+	// Sort info. Sorting is difficult enough, and intertwined with tables enough, that we just make it built in to every table
 	sortColumns      []string // keeps a historical list of columns sorted on
 	sortHistoryLimit int      // how far back to go
 	sortableHtml     string   // html to draw sortable icon
@@ -176,7 +178,9 @@ func (t *Table) HideIfEmpty() bool {
 
 // MakeSortable makes a table sortable. It will attach sortable events and show the header if it's not shown.
 func (t *Table) MakeSortable() TableI {
-	t.On(ColumnSortEvent().Private(), action.Ajax(t.ID(), SortClick))
+	if t.Event(event.Name(ColumnSortEvent())) == nil {
+		t.On(ColumnSortEvent().Private(), action.Ajax(t.ID(), SortClick))
+	}
 	if t.headerRowCount == 0 {
 		t.headerRowCount = 1
 	}
@@ -617,7 +621,7 @@ func (t *Table) SortColumns() (ret []ColumnI) {
 
 // SetSortColumnsByID sets the order of the sort column list by id.
 //
-// The specified columns will be set to sorting descended, and all other columns
+// The specified columns will be set to sorting ascended, and all other columns
 // will be set to not be sorting at all.
 //
 // The columns specified must be sortable.
@@ -634,42 +638,28 @@ func (t *Table) SetSortColumnsByID(ids ...string) {
 			if col.SortDirection() == NotSortable {
 				panic("column " + col.ID() + " is not sortable and so cannot be put in the sort list")
 			}
-			col.SetSortDirection(SortDescending)
+			col.SetSortDirection(SortAscending)
 		}
 	}
 }
 
 // SetSortIconHtml set the html used to draw the sort icons.
 // If a string is blank, it will not be changed.
-// Use the following for font awesome icons
-//
-//	`<i class="fa fa-sort fa-lg"></i>`
-//	`<i class="fa fa-sort-asc fa-lg"></i>`
-//	`<i class="fa fa-sort-desc fa-lg"></i>`
 func (t *Table) SetSortIconHtml(sortable string, asc string, desc string) {
 	if sortable != "" {
 		t.sortableHtml = sortable
 	}
 	if asc != "" {
-		t.sortAscHtml = sortable
+		t.sortAscHtml = asc
 	}
 	if desc != "" {
-		t.sortDescHtml = sortable
+		t.sortDescHtml = desc
 	}
 }
 
 // SortIconHtml returns the html used to draw the sort icon
 func (t *Table) SortIconHtml(c ColumnI) string {
 	dir := c.SortDirection()
-	var sortOrder int
-	if t.sortColumns != nil {
-		for i, sortColID := range t.sortColumns {
-			if c.ID() == sortColID {
-				sortOrder = i + 1
-				break
-			}
-		}
-	}
 
 	if SortButtonHtmlGetter != nil {
 		return SortButtonHtmlGetter(dir)
@@ -678,22 +668,16 @@ func (t *Table) SortIconHtml(c ColumnI) string {
 		case NotSorted:
 			return t.sortableHtml
 		case SortAscending:
-			if sortOrder == 1 {
-				return t.sortAscHtml
-			} else {
-				return t.sortableHtml
-			}
+			return t.sortAscHtml
 		case SortDescending:
-			if sortOrder == 1 {
-				return t.sortDescHtml
-			} else {
-				return t.sortableHtml
-			}
+			return t.sortDescHtml
 		default:
 			return "" // not sortable
 		}
 	}
 }
+
+func (t *Table) SetSortIcon(sortable string, asc string, desc string) {}
 
 // MarshalState is an internal function to save the state of the control
 func (t *Table) MarshalState(m page.SavedState) {

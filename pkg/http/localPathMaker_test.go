@@ -20,6 +20,8 @@ func TestMakeLocalPath(t *testing.T) {
 		{"with proxy local", "/proxy", "here/test", "here/test"},
 		{"dir local", "/proxy", "here/test/", "here/test/"},
 		{"extern", "/proxy", "here:/test/", "here:/test/"},
+		{"with query", "/proxy", "/test?a=b&c=d", "/proxy/test?a=b&c=d"},
+		{"with query dir", "/proxy", "/test/?a=b&c=d", "/proxy/test/?a=b&c=d"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

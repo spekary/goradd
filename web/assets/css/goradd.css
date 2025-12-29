@@ -362,4 +362,11 @@ textarea[data-grctl] {
   background-color: inherit;
 }
 
+.gr-select-wrapper {
+  position:relative;
+  height: 100%;
+  width: 100%;
+  overflow-y: scroll;
+}
+
 /*# sourceMappingURL=goradd.css.map */

@@ -195,3 +195,11 @@ div[data-grctl=datapager] {
   color: $row-color-hover;
 }
 
+// Wrapper a SelectTable so that the table can scroll
+.gr-select-wrapper {
+  position:fixed;
+  left:0;
+  top:0;
+  bottom: 0;
+  overflow-y: scroll;
+}
